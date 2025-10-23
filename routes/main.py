@@ -12,6 +12,11 @@ def index():
     # If authenticated, show dashboard
     return render_template('index.html')
 
+@main_bp.route('/widget-demo')
+def widget_demo():
+    """Widget demo page"""
+    return render_template('widget_demo.html')
+
 @main_bp.route('/analytics')
 @login_required
 def analytics():

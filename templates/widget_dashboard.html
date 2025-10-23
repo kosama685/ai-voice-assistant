@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Widget Dashboard - Voice Assistant{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="fw-bold mb-2">
+                <i class="fas fa-cube me-2"></i>Widget Management Dashboard
+            </h1>
+            <p class="text-muted">Manage and monitor your Voice Assistant widgets</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1">Active Sessions</p>
+                            <h3 class="fw-bold mb-0" id="stat-sessions">0</h3>
+                        </div>
+                        <i class="fas fa-comments fa-2x text-primary opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1">Total Messages</p>
+                            <h3 class="fw-bold mb-0" id="stat-messages">0</h3>
+                        </div>
+                        <i class="fas fa-envelope fa-2x text-success opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1">Total Turns</p>
+                            <h3 class="fw-bold mb-0" id="stat-turns">0</h3>
+                        </div>
+                        <i class="fas fa-exchange-alt fa-2x text-info opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1">Avg Turns/Session</p>
+                            <h3 class="fw-bold mb-0" id="stat-avg">0</h3>
+                        </div>
+                        <i class="fas fa-chart-line fa-2x text-warning opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#tab-embed">
+                <i class="fas fa-code me-2"></i>Embed Code
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#tab-customize">
+                <i class="fas fa-palette me-2"></i>Customize
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#tab-sessions">
+                <i class="fas fa-list me-2"></i>Sessions
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#tab-preview">
+                <i class="fas fa-eye me-2"></i>Preview
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- Embed Code Tab -->
+        <div id="tab-embed" class="tab-pane fade show active">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Embed Code</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">Copy this code to embed the widget on your website:</p>
+                    <div class="bg-dark p-3 rounded mb-3" style="overflow-x: auto;">
+                        <pre class="text-light mb-0" id="embed-code-display">
+<!-- Loading embed code... -->
+                        </pre>
+                    </div>
+                    <button class="btn btn-primary" onclick="copyEmbedCode()">
+                        <i class="fas fa-copy me-2"></i>Copy Code
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customize Tab -->
+        <div id="tab-customize" class="tab-pane fade">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Widget Customization</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Company Name</label>
+                                <input type="text" class="form-control" id="company-name" value="Voice Assistant">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Theme</label>
+                                <select class="form-select" id="theme-select">
+                                    <option value="light">Light</option>
+                                    <option value="dark">Dark</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Position</label>
+                                <select class="form-select" id="position-select">
+                                    <option value="bottom-right">Bottom Right</option>
+                                    <option value="bottom-left">Bottom Left</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Primary Color</label>
+                                <input type="color" class="form-control form-control-color" id="primary-color" value="#667eea">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Secondary Color</label>
+                                <input type="color" class="form-control form-control-color" id="secondary-color" value="#764ba2">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Corner Radius</label>
+                                <input type="text" class="form-control" id="corner-radius" value="12px">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-success" onclick="updateEmbedCode()">
+                        <i class="fas fa-refresh me-2"></i>Update Embed Code
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sessions Tab -->
+        <div id="tab-sessions" class="tab-pane fade">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Active Sessions</h5>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="refreshSessions()">
+                        <i class="fas fa-sync me-1"></i>Refresh
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="sessions-list">
+                        <p class="text-muted">No active sessions</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Tab -->
+        <div id="tab-preview" class="tab-pane fade">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Widget Preview</h5>
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 600px; background: #f5f5f5; border-radius: 8px; overflow: hidden;">
+                        <iframe id="preview-iframe" style="width: 100%; height: 100%; border: none;"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Load embed code on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        updateEmbedCode();
+        refreshSessions();
+        setInterval(refreshSessions, 5000); // Refresh every 5 seconds
+    });
+
+    function updateEmbedCode() {
+        const params = new URLSearchParams({
+            companyName: document.getElementById('company-name').value,
+            theme: document.getElementById('theme-select').value,
+            position: document.getElementById('position-select').value,
+            primaryColor: document.getElementById('primary-color').value,
+            secondaryColor: document.getElementById('secondary-color').value,
+            cornerRadius: document.getElementById('corner-radius').value
+        });
+
+        fetch(`/widget/embed-code?${params}`)
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('embed-code-display').textContent = data.embedCode;
+            })
+            .catch(e => console.error('Error:', e));
+    }
+
+    function copyEmbedCode() {
+        const code = document.getElementById('embed-code-display').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            alert('✅ Embed code copied to clipboard!');
+        });
+    }
+
+    function refreshSessions() {
+        fetch('/widget/stats')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('stat-sessions').textContent = data.totalSessions;
+                document.getElementById('stat-messages').textContent = data.totalMessages;
+                document.getElementById('stat-turns').textContent = data.totalTurns;
+                document.getElementById('stat-avg').textContent = data.averageTurnsPerSession.toFixed(1);
+
+                // Update sessions list
+                const list = document.getElementById('sessions-list');
+                if (data.sessions.length === 0) {
+                    list.innerHTML = '<p class="text-muted">No active sessions</p>';
+                } else {
+                    list.innerHTML = data.sessions.map(s => `
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>${s.session_id}</strong>
+                                        <br>
+                                        <small class="text-muted">Messages: ${s.messages.length} | Turns: ${s.turn_count}</small>
+                                    </div>
+                                    <small class="text-muted">${new Date(s.created_at).toLocaleString()}</small>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            })
+            .catch(e => console.error('Error:', e));
+    }
+</script>
+
+<style>
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    }
+
+    .nav-tabs .nav-link {
+        color: #666;
+        border: none;
+        border-bottom: 3px solid transparent;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+        background: none;
+    }
+
+    pre {
+        font-size: 12px;
+        line-height: 1.4;
+    }
+</style>
+{% endblock %}
+

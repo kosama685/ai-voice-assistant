@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Assistant Widget Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .demo-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .demo-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .demo-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .demo-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .demo-card p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .demo-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .demo-btn:hover {
+            transform: scale(1.05);
+            color: white;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            color: #666;
+        }
+
+        .feature-list li:before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .code-block {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <!-- Header -->
+        <div class="demo-header">
+            <h1>🎤 Voice Assistant Widget</h1>
+            <p>Beautiful, Production-Ready Voice Chat Widget</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-number">4</div>
+                <div class="stat-label">Tabs</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Error-Free</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">∞</div>
+                <div class="stat-label">Scalable</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">5min</div>
+                <div class="stat-label">Setup</div>
+            </div>
+        </div>
+
+        <!-- Demo Cards -->
+        <div class="demo-grid">
+            <!-- Chat Demo -->
+            <div class="demo-card">
+                <h3><i class="fas fa-comments me-2"></i>Chat Tab</h3>
+                <p>Beautiful chat interface with message history, typing indicators, and real-time responses.</p>
+                <ul class="feature-list">
+                    <li>Clean message bubbles</li>
+                    <li>User & assistant avatars</li>
+                    <li>Message history</li>
+                    <li>Real-time updates</li>
+                </ul>
+                <button class="demo-btn" onclick="openDemo('chat')">
+                    <i class="fas fa-play me-2"></i>Try Chat
+                </button>
+            </div>
+
+            <!-- Voice Demo -->
+            <div class="demo-card">
+                <h3><i class="fas fa-microphone me-2"></i>Voice Tab</h3>
+                <p>Advanced voice input with microphone control, transcription, and audio playback.</p>
+                <ul class="feature-list">
+                    <li>Microphone input</li>
+                    <li>Voice transcription</li>
+                    <li>Audio playback</li>
+                    <li>Voice status</li>
+                </ul>
+                <button class="demo-btn" onclick="openDemo('voice')">
+                    <i class="fas fa-play me-2"></i>Try Voice
+                </button>
+            </div>
+
+            <!-- Info Demo -->
+            <div class="demo-card">
+                <h3><i class="fas fa-info-circle me-2"></i>Info Tab</h3>
+                <p>Session information and analytics tracking for monitoring widget usage.</p>
+                <ul class="feature-list">
+                    <li>Session ID</li>
+                    <li>Turn counter</li>
+                    <li>Voice plays</li>
+                    <li>Analytics</li>
+                </ul>
+                <button class="demo-btn" onclick="openDemo('info')">
+                    <i class="fas fa-play me-2"></i>Try Info
+                </button>
+            </div>
+
+            <!-- Settings Demo -->
+            <div class="demo-card">
+                <h3><i class="fas fa-cog me-2"></i>Settings Tab</h3>
+                <p>Customizable settings for theme, sound, notifications, and chat management.</p>
+                <ul class="feature-list">
+                    <li>Theme switcher</li>
+                    <li>Sound control</li>
+                    <li>Notifications</li>
+                    <li>Clear chat</li>
+                </ul>
+                <button class="demo-btn" onclick="openDemo('settings')">
+                    <i class="fas fa-play me-2"></i>Try Settings
+                </button>
+            </div>
+
+            <!-- Customization -->
+            <div class="demo-card">
+                <h3><i class="fas fa-palette me-2"></i>Customization</h3>
+                <p>Fully customizable widget with colors, themes, logos, and positioning options.</p>
+                <ul class="feature-list">
+                    <li>Custom colors</li>
+                    <li>Company logo</li>
+                    <li>Theme options</li>
+                    <li>Position control</li>
+                </ul>
+                <button class="demo-btn" onclick="window.location.href='/widget/dashboard'">
+                    <i class="fas fa-play me-2"></i>Customize
+                </button>
+            </div>
+
+            <!-- Integration -->
+            <div class="demo-card">
+                <h3><i class="fas fa-code me-2"></i>Easy Integration</h3>
+                <p>Copy-paste embed code to add the widget to any website in seconds.</p>
+                <ul class="feature-list">
+                    <li>One-line embed</li>
+                    <li>No dependencies</li>
+                    <li>Responsive design</li>
+                    <li>Mobile friendly</li>
+                </ul>
+                <button class="demo-btn" onclick="showEmbedCode()">
+                    <i class="fas fa-play me-2"></i>Get Code
+                </button>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="demo-card" style="margin-bottom: 30px;">
+            <h3><i class="fas fa-star me-2"></i>Key Features</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul class="feature-list">
+                        <li>Multi-tab interface</li>
+                        <li>Real-time chat</li>
+                        <li>Voice input/output</li>
+                        <li>Session management</li>
+                        <li>Analytics tracking</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul class="feature-list">
+                        <li>Customizable theme</li>
+                        <li>Responsive design</li>
+                        <li>Error handling</li>
+                        <li>Admin dashboard</li>
+                        <li>Production ready</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Embed Code Section -->
+        <div class="demo-card" style="margin-bottom: 30px;">
+            <h3><i class="fas fa-code me-2"></i>Quick Start</h3>
+            <p>Add this code to your website:</p>
+            <div class="code-block">
+&lt;!-- Voice Assistant Widget --&gt;
+&lt;script src="http://127.0.0.1:5000/static/widget.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+    const widget = new VoiceAssistantWidget({
+        apiUrl: 'http://127.0.0.1:5000',
+        theme: 'light',
+        position: 'bottom-right',
+        companyName: 'Your Company'
+    });
+&lt;/script&gt;
+            </div>
+            <button class="demo-btn" onclick="copyCode()">
+                <i class="fas fa-copy me-2"></i>Copy Code
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>&copy; 2025 Voice Assistant Widget. Production-Ready & Error-Free.</p>
+        </div>
+    </div>
+
+    <!-- Widget Instance -->
+    <script src="/static/widget.js"></script>
+    <script>
+        // Initialize widget
+        const widget = new VoiceAssistantWidget({
+            apiUrl: 'http://127.0.0.1:5000',
+            theme: 'light',
+            position: 'bottom-right',
+            companyName: 'Voice Assistant',
+            primaryColor: '#667eea',
+            secondaryColor: '#764ba2'
+        });
+
+        function openDemo(tab) {
+            // Open widget and switch to tab
+            document.querySelector('.widget-button').click();
+            setTimeout(() => {
+                const tabBtn = document.querySelector(`[data-tab="${tab}"]`);
+                if (tabBtn) tabBtn.click();
+            }, 300);
+        }
+
+        function showEmbedCode() {
+            alert(`Copy this code to your website:
+
+<!-- Voice Assistant Widget -->
+<script src="http://127.0.0.1:5000/static/widget.js"><\/script>
+<script>
+    const widget = new VoiceAssistantWidget({
+        apiUrl: 'http://127.0.0.1:5000',
+        theme: 'light',
+        position: 'bottom-right',
+        companyName: 'Your Company'
+    });
+<\/script>
+<!-- End Widget -->`);
+        }
+
+        function copyCode() {
+            const code = `<!-- Voice Assistant Widget -->
+<script src="http://127.0.0.1:5000/static/widget.js"><\/script>
+<script>
+    const widget = new VoiceAssistantWidget({
+        apiUrl: 'http://127.0.0.1:5000',
+        theme: 'light',
+        position: 'bottom-right',
+        companyName: 'Your Company'
+    });
+<\/script>
+<!-- End Widget -->`;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('✅ Code copied to clipboard!');
+            });
+        }
+    </script>
+</body>
+</html>
+
