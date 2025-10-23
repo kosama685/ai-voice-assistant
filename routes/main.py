@@ -70,3 +70,15 @@ def prompts_enhanced():
 @login_required
 def pricing():
     return render_template('pricing.html')
+
+@main_bp.route('/dashboard-enhanced')
+@login_required
+def dashboard_enhanced():
+    """Enhanced dashboard with revenue, packages, and SEO"""
+    return render_template('dashboard_enhanced.html')
+
+@main_bp.route('/api-sandbox')
+@login_required
+def api_sandbox():
+    """API testing sandbox"""
+    return render_template('api_sandbox.html')

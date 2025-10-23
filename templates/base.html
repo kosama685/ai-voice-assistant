@@ -392,8 +392,12 @@
         </div>
         <ul class="sidebar-menu">
             <li><a href="{{ url_for('main.index') }}" class="menu-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="{{ url_for('main.dashboard_enhanced') }}" class="menu-item"><i class="fas fa-chart-line"></i> Enhanced Dashboard</a></li>
             <li><a href="{{ url_for('main.users') }}" class="menu-item"><i class="fas fa-users"></i> User Management</a></li>
+            <li><a href="{{ url_for('main.prompts') }}" class="menu-item"><i class="fas fa-comment-dots"></i> Prompts</a></li>
             <li><a href="{{ url_for('main.prompts_enhanced') }}" class="menu-item"><i class="fas fa-comment-dots"></i> Prompt & Logic</a></li>
+            <li><a href="{{ url_for('main.widget_demo') }}" class="menu-item"><i class="fas fa-globe"></i> Widget Demo</a></li>
+            <li><a href="{{ url_for('main.api_sandbox') }}" class="menu-item"><i class="fas fa-flask"></i> API Sandbox</a></li>
             <li><a href="{{ url_for('main.monitoring') }}" class="menu-item"><i class="fas fa-chart-line"></i> Live Monitoring</a></li>
             <li><a href="{{ url_for('main.analytics_enhanced') }}" class="menu-item"><i class="fas fa-chart-bar"></i> Analytics & Reports</a></li>
             <li><a href="{{ url_for('main.config') }}" class="menu-item"><i class="fas fa-cog"></i> System Configuration</a></li>
@@ -405,11 +409,35 @@
     </div>
 
     <div class="main-content">
+        <!-- Enhanced Header -->
         <div class="top-header">
-            <h2 id="pageTitle">{% block page_title %}Dashboard{% endblock %}</h2>
-            <div class="user-info">
-                <span class="me-3">{{ current_user.name if current_user.is_authenticated else 'Guest' }}</span>
-                <img src="https://picsum.photos/seed/admin/40/40.jpg" alt="User" style="width: 40px; height: 40px; border-radius: 50%;">
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <div class="d-flex align-items-center">
+                    <h2 id="pageTitle" class="mb-0">{% block page_title %}Dashboard{% endblock %}</h2>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Quick Navigation -->
+                    <div class="btn-group" role="group">
+                        <a href="{{ url_for('main.widget_demo') }}" class="btn btn-sm btn-outline-primary" title="Widget Demo">
+                            <i class="fas fa-globe"></i> Widget Demo
+                        </a>
+                        <a href="{{ url_for('main.prompts') }}" class="btn btn-sm btn-outline-primary" title="Prompts">
+                            <i class="fas fa-comment-dots"></i> Prompts
+                        </a>
+                        <a href="{{ url_for('main.api_sandbox') }}" class="btn btn-sm btn-outline-primary" title="API Sandbox">
+                            <i class="fas fa-flask"></i> API Test
+                        </a>
+                        <a href="{{ url_for('main.dashboard_enhanced') }}" class="btn btn-sm btn-outline-primary" title="Enhanced Dashboard">
+                            <i class="fas fa-chart-line"></i> Dashboard
+                        </a>
+                    </div>
+
+                    <!-- User Info -->
+                    <div class="user-info">
+                        <span class="me-3">{{ current_user.name if current_user.is_authenticated else 'Guest' }}</span>
+                        <img src="https://picsum.photos/seed/admin/40/40.jpg" alt="User" style="width: 40px; height: 40px; border-radius: 50%;">
+                    </div>
+                </div>
             </div>
         </div>
 

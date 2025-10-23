@@ -117,18 +117,23 @@ def get_prompts():
 @login_required
 def create_prompt():
     data = request.get_json()
-    
+
+    # Validate required fields
+    if not data.get('name') or not data.get('content'):
+        return jsonify({'error': 'Name and content are required'}), 400
+
     prompt = Prompt(
         name=data['name'],
         type=data.get('type', 'custom'),
         content=data['content'],
+        category=data.get('category', 'general'),
         status=data.get('status', 'active'),
         created_by=current_user.id
     )
-    
+
     db.session.add(prompt)
     db.session.commit()
-    
+
     # Log the action
     log = AuditLog(
         user_id=current_user.id,
@@ -139,7 +144,7 @@ def create_prompt():
     )
     db.session.add(log)
     db.session.commit()
-    
+
     return jsonify(prompt.to_dict()), 201
 
 @api_bp.route('/prompts/<int:prompt_id>', methods=['GET'])
@@ -153,15 +158,20 @@ def get_prompt(prompt_id):
 def update_prompt(prompt_id):
     prompt = Prompt.query.get_or_404(prompt_id)
     data = request.get_json()
-    
+
+    # Validate required fields
+    if data.get('name') == '' or data.get('content') == '':
+        return jsonify({'error': 'Name and content cannot be empty'}), 400
+
     prompt.name = data.get('name', prompt.name)
     prompt.type = data.get('type', prompt.type)
     prompt.content = data.get('content', prompt.content)
+    prompt.category = data.get('category', prompt.category)
     prompt.status = data.get('status', prompt.status)
     prompt.updated_at = datetime.utcnow()
-    
+
     db.session.commit()
-    
+
     # Log the action
     log = AuditLog(
         user_id=current_user.id,
@@ -172,7 +182,7 @@ def update_prompt(prompt_id):
     )
     db.session.add(log)
     db.session.commit()
-    
+
     return jsonify(prompt.to_dict())
 
 @api_bp.route('/prompts/<int:prompt_id>', methods=['DELETE'])

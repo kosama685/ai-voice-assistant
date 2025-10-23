@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block page_title %}API Testing Sandbox{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1>🧪 API Testing Sandbox</h1>
+      <p class="text-muted">Test all API endpoints with real-time request/response monitoring</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Request Panel -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">📤 Request</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label"><strong>Method</strong></label>
+            <select class="form-select" id="method">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="DELETE">DELETE</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label"><strong>Endpoint</strong></label>
+            <select class="form-select" id="endpoint" onchange="updateEndpointInfo()">
+              <option value="">-- Select Endpoint --</option>
+              <optgroup label="Prompts">
+                <option value="/api/prompts">GET /api/prompts - List all prompts</option>
+                <option value="/api/prompts/1">GET /api/prompts/1 - Get prompt by ID</option>
+                <option value="/api/prompts">POST /api/prompts - Create prompt</option>
+                <option value="/api/prompts/1">PUT /api/prompts/1 - Update prompt</option>
+                <option value="/api/prompts/1">DELETE /api/prompts/1 - Delete prompt</option>
+              </optgroup>
+              <optgroup label="Users">
+                <option value="/api/users">GET /api/users - List all users</option>
+                <option value="/api/users/1">GET /api/users/1 - Get user by ID</option>
+              </optgroup>
+              <optgroup label="Widget">
+                <option value="/widget/health">GET /widget/health - Widget health check</option>
+                <option value="/widget/api/chat">POST /widget/api/chat - Send chat message</option>
+                <option value="/widget/stats">GET /widget/stats - Widget statistics</option>
+              </optgroup>
+              <optgroup label="Dashboard">
+                <option value="/api/dashboard/stats">GET /api/dashboard/stats - Dashboard statistics</option>
+                <option value="/api/audit-logs">GET /api/audit-logs - Audit logs</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label"><strong>Request Body (JSON)</strong></label>
+            <textarea class="form-control" id="requestBody" rows="8" placeholder='{"name": "Test Prompt", "content": "..."}'></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label"><strong>Headers</strong></label>
+            <div class="input-group mb-2">
+              <input type="text" class="form-control" placeholder="Header name" id="headerName">
+              <input type="text" class="form-control" placeholder="Header value" id="headerValue">
+              <button class="btn btn-outline-secondary" onclick="addHeader()">Add</button>
+            </div>
+            <div id="headersList"></div>
+          </div>
+
+          <button class="btn btn-success btn-lg w-100" onclick="sendRequest()">
+            🚀 Send Request
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Response Panel -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0">📥 Response</h5>
+        </div>
+        <div class="card-body">
+          <div id="responseStatus" class="mb-3"></div>
+          <div id="responseTime" class="mb-3"></div>
+          <div id="responseHeaders" class="mb-3"></div>
+          
+          <label class="form-label"><strong>Response Body</strong></label>
+          <pre id="responseBody" class="bg-light p-3 rounded" style="max-height: 400px; overflow-y: auto;">
+// Response will appear here
+          </pre>
+
+          <button class="btn btn-secondary w-100 mt-3" onclick="copyResponse()">
+            📋 Copy Response
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documentation -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">📚 API Documentation</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h6>Prompts API</h6>
+              <ul class="small">
+                <li><code>GET /api/prompts</code> - List all prompts</li>
+                <li><code>POST /api/prompts</code> - Create new prompt</li>
+                <li><code>GET /api/prompts/:id</code> - Get prompt details</li>
+                <li><code>PUT /api/prompts/:id</code> - Update prompt</li>
+                <li><code>DELETE /api/prompts/:id</code> - Delete prompt</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <h6>Widget API</h6>
+              <ul class="small">
+                <li><code>GET /widget/health</code> - Health check</li>
+                <li><code>POST /widget/api/chat</code> - Send message</li>
+                <li><code>POST /widget/api/voice</code> - Voice input</li>
+                <li><code>GET /widget/stats</code> - Get statistics</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let headers = {};
+
+function updateEndpointInfo() {
+  const endpoint = document.getElementById('endpoint').value;
+  const method = document.getElementById('method');
+  
+  if (endpoint.includes('POST') || endpoint.includes('PUT')) {
+    method.value = endpoint.includes('POST') ? 'POST' : 'PUT';
+  } else if (endpoint.includes('DELETE')) {
+    method.value = 'DELETE';
+  } else {
+    method.value = 'GET';
+  }
+  
+  // Extract clean endpoint
+  const cleanEndpoint = endpoint.split(' - ')[0];
+  document.getElementById('endpoint').value = cleanEndpoint;
+}
+
+function addHeader() {
+  const name = document.getElementById('headerName').value;
+  const value = document.getElementById('headerValue').value;
+  
+  if (name && value) {
+    headers[name] = value;
+    document.getElementById('headerName').value = '';
+    document.getElementById('headerValue').value = '';
+    renderHeaders();
+  }
+}
+
+function renderHeaders() {
+  const list = document.getElementById('headersList');
+  list.innerHTML = Object.entries(headers).map(([k, v]) => `
+    <div class="badge bg-secondary me-2 mb-2">
+      ${k}: ${v}
+      <button class="btn-close btn-close-white ms-2" onclick="deleteHeader('${k}')" style="font-size: 0.7rem;"></button>
+    </div>
+  `).join('');
+}
+
+function deleteHeader(name) {
+  delete headers[name];
+  renderHeaders();
+}
+
+async function sendRequest() {
+  const method = document.getElementById('method').value;
+  const endpoint = document.getElementById('endpoint').value;
+  const body = document.getElementById('requestBody').value;
+
+  if (!endpoint) {
+    alert('Please select an endpoint');
+    return;
+  }
+
+  const start = Date.now();
+  try {
+    const options = {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers
+      }
+    };
+
+    if (body && (method === 'POST' || method === 'PUT')) {
+      options.body = body;
+    }
+
+    const res = await fetch(endpoint, options);
+    const time = Date.now() - start;
+    const data = await res.json();
+
+    document.getElementById('responseStatus').innerHTML = `
+      <div class="alert alert-${res.ok ? 'success' : 'danger'}">
+        <strong>Status:</strong> ${res.status} ${res.statusText}
+      </div>
+    `;
+
+    document.getElementById('responseTime').innerHTML = `
+      <div class="alert alert-info">
+        <strong>Response Time:</strong> ${time}ms
+      </div>
+    `;
+
+    document.getElementById('responseBody').textContent = JSON.stringify(data, null, 2);
+  } catch (error) {
+    document.getElementById('responseStatus').innerHTML = `
+      <div class="alert alert-danger">
+        <strong>Error:</strong> ${error.message}
+      </div>
+    `;
+    document.getElementById('responseBody').textContent = error.message;
+  }
+}
+
+function copyResponse() {
+  const text = document.getElementById('responseBody').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    alert('✅ Response copied to clipboard');
+  });
+}
+</script>
+{% endblock %}
+
