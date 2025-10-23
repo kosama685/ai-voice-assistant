@@ -1,0 +1,448 @@
+{% extends 'base.html' %}
+
+{% block page_title %}🎤 Voice Chat Assistant{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Conversations Sidebar -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">💬 Conversations</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="conversationsList" style="max-height: 600px; overflow-y: auto;">
+                        <div class="text-center p-3 text-muted">Loading conversations...</div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary btn-sm w-100" onclick="createNewConversation()">
+                        <i class="fas fa-plus"></i> New Chat
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="col-md-9">
+            <div class="card h-100">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-white" id="chatTitle">🎤 Voice Chat</h5>
+                        <div>
+                            <button class="btn btn-sm btn-light" onclick="toggleSettings()">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <button class="btn btn-sm btn-light" onclick="analyzeConversation()">
+                                <i class="fas fa-chart-bar"></i> Analyze
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages Area -->
+                <div class="card-body" id="messagesArea" style="height: 500px; overflow-y: auto; background: #f8f9fa;">
+                    <div class="text-center text-muted mt-5">
+                        <i class="fas fa-comments fa-3x mb-3"></i>
+                        <p>Select a conversation or create a new one to start chatting</p>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="card-footer bg-light">
+                    <div class="row g-2">
+                        <!-- Voice Input -->
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <button class="btn btn-outline-primary" id="voiceBtn" onclick="toggleVoiceRecording()">
+                                    <i class="fas fa-microphone"></i> <span id="voiceStatus">Record</span>
+                                </button>
+                                <input type="text" class="form-control" id="voiceTranscript" placeholder="Voice will appear here..." readonly>
+                            </div>
+                        </div>
+
+                        <!-- Text Input -->
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="textInput" placeholder="Type your message...">
+                                <button class="btn btn-primary" onclick="sendTextMessage()">
+                                    <i class="fas fa-paper-plane"></i> Send
+                                </button>
+                                <button class="btn btn-outline-success" onclick="toggleTextToSpeech()">
+                                    <i class="fas fa-volume-up"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal fade" id="settingsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">⚙️ Settings</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">AI Temperature (Creativity)</label>
+                    <input type="range" class="form-range" id="temperatureSlider" min="0" max="1" step="0.1" value="0.7">
+                    <small class="text-muted">Lower = More focused, Higher = More creative</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Text-to-Speech</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="ttsEnabled" checked>
+                        <label class="form-check-label">Enable TTS for responses</label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Voice Provider</label>
+                    <select class="form-select" id="voiceProvider">
+                        <option value="coqui">Coqui (Local, Fast)</option>
+                        <option value="google">Google Cloud TTS</option>
+                        <option value="elevenlabs">ElevenLabs (Premium)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analysis Modal -->
+<div class="modal fade" id="analysisModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">📊 Conversation Analysis</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="analysisContent">
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Analyzing...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .message {
+        margin-bottom: 15px;
+        animation: slideIn 0.3s ease-in;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .message.user {
+        text-align: right;
+    }
+
+    .message.user .message-content {
+        background: #667eea;
+        color: white;
+        border-radius: 15px 15px 0 15px;
+    }
+
+    .message.assistant .message-content {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 15px 15px 15px 0;
+    }
+
+    .message-content {
+        display: inline-block;
+        padding: 10px 15px;
+        max-width: 70%;
+        word-wrap: break-word;
+    }
+
+    .conversation-item {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .conversation-item:hover {
+        background: #f0f0f0;
+    }
+
+    .conversation-item.active {
+        background: #667eea;
+        color: white;
+    }
+
+    #voiceBtn.recording {
+        background: #dc3545;
+        color: white;
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+</style>
+
+<script>
+    let currentConversationId = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let textToSpeechEnabled = true;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        loadConversations();
+    });
+
+    // Load conversations
+    async function loadConversations() {
+        try {
+            const response = await fetch('/api/voice/conversations');
+            const data = await response.json();
+
+            const list = document.getElementById('conversationsList');
+            if (data.conversations.length === 0) {
+                list.innerHTML = '<div class="text-center p-3 text-muted">No conversations yet</div>';
+                return;
+            }
+
+            list.innerHTML = data.conversations.map(conv => `
+                <div class="conversation-item ${conv.id === currentConversationId ? 'active' : ''}" 
+                     onclick="selectConversation(${conv.id})">
+                    <strong>${conv.title}</strong>
+                    <small class="d-block text-muted">${conv.message_count} messages</small>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading conversations:', error);
+        }
+    }
+
+    // Create new conversation
+    async function createNewConversation() {
+        try {
+            const response = await fetch('/api/voice/conversations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: `Chat ${new Date().toLocaleTimeString()}` })
+            });
+            const data = await response.json();
+            if (data.success) {
+                currentConversationId = data.conversation_id;
+                loadConversations();
+                loadConversation(currentConversationId);
+            }
+        } catch (error) {
+            console.error('Error creating conversation:', error);
+        }
+    }
+
+    // Select conversation
+    async function selectConversation(conversationId) {
+        currentConversationId = conversationId;
+        loadConversations();
+        loadConversation(conversationId);
+    }
+
+    // Load conversation messages
+    async function loadConversation(conversationId) {
+        try {
+            const response = await fetch(`/api/voice/conversations/${conversationId}`);
+            const data = await response.json();
+
+            document.getElementById('chatTitle').textContent = `💬 ${data.title}`;
+            const messagesArea = document.getElementById('messagesArea');
+
+            if (data.messages.length === 0) {
+                messagesArea.innerHTML = '<div class="text-center text-muted mt-5">Start a conversation...</div>';
+                return;
+            }
+
+            messagesArea.innerHTML = data.messages.map(msg => `
+                <div class="message ${msg.sender}">
+                    <div class="message-content">
+                        ${msg.content}
+                        <small class="d-block mt-1 opacity-75">${new Date(msg.created_at).toLocaleTimeString()}</small>
+                    </div>
+                </div>
+            `).join('');
+
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        } catch (error) {
+            console.error('Error loading conversation:', error);
+        }
+    }
+
+    // Voice recording
+    async function toggleVoiceRecording() {
+        if (!currentConversationId) {
+            alert('Please create or select a conversation first');
+            return;
+        }
+
+        if (!isRecording) {
+            startRecording();
+        } else {
+            stopRecording();
+        }
+    }
+
+    async function startRecording() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                await sendVoiceMessage(audioBlob);
+            };
+
+            mediaRecorder.start();
+            isRecording = true;
+            document.getElementById('voiceBtn').classList.add('recording');
+            document.getElementById('voiceStatus').textContent = 'Stop';
+        } catch (error) {
+            console.error('Error accessing microphone:', error);
+            alert('Unable to access microphone');
+        }
+    }
+
+    function stopRecording() {
+        mediaRecorder.stop();
+        isRecording = false;
+        document.getElementById('voiceBtn').classList.remove('recording');
+        document.getElementById('voiceStatus').textContent = 'Record';
+    }
+
+    // Send voice message
+    async function sendVoiceMessage(audioBlob) {
+        try {
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'audio.wav');
+            formData.append('conversation_id', currentConversationId);
+
+            const response = await fetch('/api/voice/chat/voice', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                loadConversation(currentConversationId);
+                if (data.audio && textToSpeechEnabled) {
+                    playAudio(data.audio);
+                }
+            }
+        } catch (error) {
+            console.error('Error sending voice message:', error);
+        }
+    }
+
+    // Send text message
+    async function sendTextMessage() {
+        const text = document.getElementById('textInput').value.trim();
+        if (!text || !currentConversationId) return;
+
+        try {
+            const response = await fetch('/api/voice/chat/text', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    conversation_id: currentConversationId,
+                    text: text,
+                    synthesize: textToSpeechEnabled
+                })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                document.getElementById('textInput').value = '';
+                loadConversation(currentConversationId);
+                if (data.audio && textToSpeechEnabled) {
+                    playAudio(data.audio);
+                }
+            }
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    }
+
+    // Play audio
+    function playAudio(base64Audio) {
+        const audio = new Audio(`data:audio/mp3;base64,${base64Audio}`);
+        audio.play();
+    }
+
+    // Toggle settings
+    function toggleSettings() {
+        new bootstrap.Modal(document.getElementById('settingsModal')).show();
+    }
+
+    // Toggle TTS
+    function toggleTextToSpeech() {
+        textToSpeechEnabled = !textToSpeechEnabled;
+        const btn = event.target.closest('button');
+        btn.classList.toggle('active');
+    }
+
+    // Analyze conversation
+    async function analyzeConversation() {
+        if (!currentConversationId) return;
+
+        try {
+            const response = await fetch(`/api/voice/conversations/${currentConversationId}/analyze`);
+            const data = await response.json();
+
+            const modal = new bootstrap.Modal(document.getElementById('analysisModal'));
+            const content = document.getElementById('analysisContent');
+
+            if (data.success) {
+                content.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>📊 Sentiment</h6>
+                            <p>${JSON.stringify(data.sentiment, null, 2)}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>🏷️ Entities</h6>
+                            <p>${JSON.stringify(data.entities, null, 2)}</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `<p class="text-danger">${data.error}</p>`;
+            }
+
+            modal.show();
+        } catch (error) {
+            console.error('Error analyzing conversation:', error);
+        }
+    }
+</script>
+{% endblock %}
+

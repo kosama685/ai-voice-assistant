@@ -17,6 +17,12 @@ def widget_demo():
     """Widget demo page"""
     return render_template('widget_demo.html')
 
+@main_bp.route('/voice-chat')
+@login_required
+def voice_chat():
+    """Voice chat interface"""
+    return render_template('voice_chat.html')
+
 @main_bp.route('/analytics')
 @login_required
 def analytics():
