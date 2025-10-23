@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block page_title %}Pricing & Subscription Plans{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+	<!-- Header Section -->
+	<div class="row mb-5">
+		<div class="col-12 text-center">
+			<h1 class="display-4 fw-bold mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+				🚀 Choose Your Perfect Plan
+			</h1>
+			<p class="lead text-muted mb-4">Unlock the power of AI-driven voice assistance with flexible pricing options</p>
+			
+			<!-- Toggle Monthly/Yearly -->
+			<div class="d-flex justify-content-center align-items-center gap-3 mb-4">
+				<span class="text-muted">Monthly</span>
+				<div class="form-check form-switch">
+					<input class="form-check-input" type="checkbox" id="billingToggle" style="width: 3rem; height: 1.5rem; cursor: pointer;">
+				</div>
+				<span class="text-muted">Yearly <span class="badge bg-success">Save 20%</span></span>
+			</div>
+		</div>
+	</div>
+
+	<!-- Pricing Cards -->
+	<div class="row g-4 mb-5">
+		<!-- Free Plan -->
+		<div class="col-md-6 col-lg-3">
+			<div class="card h-100 border-0 shadow-sm hover-lift" style="transition: all 0.3s ease;">
+				<div class="card-body p-4">
+					<div class="mb-3">
+						<h5 class="card-title fw-bold">🎯 Free</h5>
+						<p class="text-muted small">Perfect for getting started</p>
+					</div>
+					<div class="mb-4">
+						<h2 class="fw-bold">$0<span class="fs-6 text-muted">/month</span></h2>
+					</div>
+					<button class="btn btn-outline-primary w-100 mb-4">Get Started</button>
+					<ul class="list-unstyled">
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>Up to 100 conversations/month</li>
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>Basic voice features</li>
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>Community support</li>
+						<li class="mb-2"><i class="fas fa-times text-danger me-2"></i>Advanced analytics</li>
+						<li class="mb-2"><i class="fas fa-times text-danger me-2"></i>Priority support</li>
+						<li class="mb-2"><i class="fas fa-times text-danger me-2"></i>Custom integrations</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+		<!-- Starter Plan -->
+		<div class="col-md-6 col-lg-3">
+			<div class="card h-100 border-0 shadow-sm hover-lift" style="transition: all 0.3s ease;">
+				<div class="card-body p-4">
+					<div class="mb-3">
+						<h5 class="card-title fw-bold">⭐ Starter</h5>
+						<p class="text-muted small">For small teams</p>
+					</div>
+					<div class="mb-4">
+						<h2 class="fw-bold">$29<span class="fs-6 text-muted">/month</span></h2>
+						<small class="text-muted" id="starterYearly" style="display:none;">$290/year (Save $58)</small>
+					</div>
+					<button class="btn btn-primary w-100 mb-4">Subscribe Now</button>
+					<ul class="list-unstyled">
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>Up to 5,000 conversations/month</li>
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>Advanced voice features</li>
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>Email support</li>
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>Basic analytics</li>
+						<li class="mb-2"><i class="fas fa-times text-danger me-2"></i>Priority support</li>
+						<li class="mb-2"><i class="fas fa-times text-danger me-2"></i>Custom integrations</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+		<!-- Professional Plan (Featured) -->
+		<div class="col-md-6 col-lg-3">
+			<div class="card h-100 border-0 shadow-lg hover-lift" style="border: 2px solid #667eea; transition: all 0.3s ease; transform: scale(1.05);">
+				<div class="card-body p-4">
+					<div class="mb-3">
+						<span class="badge bg-primary mb-2">Most Popular</span>
+						<h5 class="card-title fw-bold">💎 Professional</h5>
+						<p class="text-muted small">For growing businesses</p>
+					</div>
+					<div class="mb-4">
+						<h2 class="fw-bold">$99<span class="fs-6 text-muted">/month</span></h2>
+						<small class="text-muted" id="proYearly" style="display:none;">$950/year (Save $238)</small>
+					</div>
+					<button class="btn btn-primary w-100 mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">Subscribe Now</button>
+					<ul class="list-unstyled">
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>Unlimited conversations</li>
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>All voice features</li>
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>Priority support</li>
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>Advanced analytics</li>
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>Custom integrations</li>
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>API access</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+		<!-- Enterprise Plan -->
+		<div class="col-md-6 col-lg-3">
+			<div class="card h-100 border-0 shadow-sm hover-lift" style="transition: all 0.3s ease;">
+				<div class="card-body p-4">
+					<div class="mb-3">
+						<h5 class="card-title fw-bold">🏢 Enterprise</h5>
+						<p class="text-muted small">For large organizations</p>
+					</div>
+					<div class="mb-4">
+						<h2 class="fw-bold">Custom<span class="fs-6 text-muted">/month</span></h2>
+					</div>
+					<button class="btn btn-outline-primary w-100 mb-4">Contact Sales</button>
+					<ul class="list-unstyled">
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>Unlimited everything</li>
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>Dedicated support</li>
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>Custom SLA</li>
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>On-premise deployment</li>
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>Advanced security</li>
+						<li class="mb-2"><i class="fas fa-check text-success me-2"></i>White-label options</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Demo Account Section -->
+	<div class="row mb-5">
+		<div class="col-12">
+			<div class="card border-0 shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+				<div class="card-body p-5">
+					<div class="row align-items-center">
+						<div class="col-md-8">
+							<h3 class="fw-bold mb-3">🎁 Try Professional Plan Free for 30 Days</h3>
+							<p class="mb-0">No credit card required. Full access to all Professional features. Cancel anytime.</p>
+						</div>
+						<div class="col-md-4 text-md-end mt-3 mt-md-0">
+							<button class="btn btn-light btn-lg fw-bold" onclick="startDemoAccount()">
+								<i class="fas fa-rocket me-2"></i>Start Free Trial
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Features Comparison -->
+	<div class="row mb-5">
+		<div class="col-12">
+			<h3 class="fw-bold mb-4 text-center">📊 Feature Comparison</h3>
+			<div class="table-responsive">
+				<table class="table table-hover">
+					<thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+						<tr>
+							<th>Feature</th>
+							<th class="text-center">Free</th>
+							<th class="text-center">Starter</th>
+							<th class="text-center">Professional</th>
+							<th class="text-center">Enterprise</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><strong>Conversations/Month</strong></td>
+							<td class="text-center">100</td>
+							<td class="text-center">5,000</td>
+							<td class="text-center">Unlimited</td>
+							<td class="text-center">Unlimited</td>
+						</tr>
+						<tr>
+							<td><strong>Voice Features</strong></td>
+							<td class="text-center"><i class="fas fa-check text-success"></i></td>
+							<td class="text-center"><i class="fas fa-check text-success"></i></td>
+							<td class="text-center"><i class="fas fa-check text-success"></i></td>
+							<td class="text-center"><i class="fas fa-check text-success"></i></td>
+						</tr>
+						<tr>
+							<td><strong>Analytics</strong></td>
+							<td class="text-center"><i class="fas fa-times text-danger"></i></td>
+							<td class="text-center">Basic</td>
+							<td class="text-center">Advanced</td>
+							<td class="text-center">Advanced+</td>
+						</tr>
+						<tr>
+							<td><strong>API Access</strong></td>
+							<td class="text-center"><i class="fas fa-times text-danger"></i></td>
+							<td class="text-center"><i class="fas fa-times text-danger"></i></td>
+							<td class="text-center"><i class="fas fa-check text-success"></i></td>
+							<td class="text-center"><i class="fas fa-check text-success"></i></td>
+						</tr>
+						<tr>
+							<td><strong>Custom Integrations</strong></td>
+							<td class="text-center"><i class="fas fa-times text-danger"></i></td>
+							<td class="text-center"><i class="fas fa-times text-danger"></i></td>
+							<td class="text-center"><i class="fas fa-check text-success"></i></td>
+							<td class="text-center"><i class="fas fa-check text-success"></i></td>
+						</tr>
+						<tr>
+							<td><strong>Support</strong></td>
+							<td class="text-center">Community</td>
+							<td class="text-center">Email</td>
+							<td class="text-center">Priority</td>
+							<td class="text-center">Dedicated</td>
+						</tr>
+						<tr>
+							<td><strong>SLA</strong></td>
+							<td class="text-center">-</td>
+							<td class="text-center">99%</td>
+							<td class="text-center">99.5%</td>
+							<td class="text-center">99.99%</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<!-- FAQ Section -->
+	<div class="row">
+		<div class="col-12">
+			<h3 class="fw-bold mb-4 text-center">❓ Frequently Asked Questions</h3>
+			<div class="accordion" id="faqAccordion">
+				<div class="accordion-item">
+					<h2 class="accordion-header">
+						<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+							Can I upgrade or downgrade my plan anytime?
+						</button>
+					</h2>
+					<div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+						<div class="accordion-body">
+							Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate your billing accordingly.
+						</div>
+					</div>
+				</div>
+				<div class="accordion-item">
+					<h2 class="accordion-header">
+						<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+							What payment methods do you accept?
+						</button>
+					</h2>
+					<div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+						<div class="accordion-body">
+							We accept all major credit cards (Visa, Mastercard, American Express), PayPal, and bank transfers for Enterprise customers.
+						</div>
+					</div>
+				</div>
+				<div class="accordion-item">
+					<h2 class="accordion-header">
+						<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+							Is there a free trial?
+						</button>
+					</h2>
+					<div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+						<div class="accordion-body">
+							Yes! Get 30 days free access to our Professional plan. No credit card required. You can cancel anytime during the trial period.
+						</div>
+					</div>
+				</div>
+				<div class="accordion-item">
+					<h2 class="accordion-header">
+						<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+							What happens when my trial ends?
+						</button>
+					</h2>
+					<div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+						<div class="accordion-body">
+							Your account will be downgraded to the Free plan. You'll receive email reminders before the trial ends so you can choose to upgrade.
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<style>
+	.hover-lift {
+		cursor: pointer;
+	}
+	.hover-lift:hover {
+		transform: translateY(-10px);
+		box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+	}
+	.table-hover tbody tr:hover {
+		background-color: rgba(102, 126, 234, 0.1);
+	}
+</style>
+
+<script>
+	const billingToggle = document.getElementById('billingToggle');
+	
+	billingToggle.addEventListener('change', function() {
+		const starterYearly = document.getElementById('starterYearly');
+		const proYearly = document.getElementById('proYearly');
+		
+		if (this.checked) {
+			starterYearly.style.display = 'block';
+			proYearly.style.display = 'block';
+		} else {
+			starterYearly.style.display = 'none';
+			proYearly.style.display = 'none';
+		}
+	});
+	
+	function startDemoAccount() {
+		alert('Demo account feature coming soon! You will be able to start a 30-day free trial of the Professional plan.');
+		// This will be connected to the backend demo account creation
+	}
+</script>
+{% endblock %}
+

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Prompts{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Prompts</h3>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPromptModal">Add Prompt</button>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Content</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="promptList">
+        {% for p in prompts %}
+          <tr>
+            <td>{{ p.id }}</td>
+            <td>{{ p.name }}</td>
+            <td>{{ p.type }}</td>
+            <td>{{ p.content[:120] }}{% if p.content|length > 120 %}...{% endif %}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary edit-prompt" data-id="{{ p.id }}">Edit</button>
+              <button class="btn btn-sm btn-outline-danger delete-prompt" data-id="{{ p.id }}">Delete</button>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% include 'prompt_modals.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', ()=>{
+  const addForm = document.getElementById('addPromptForm');
+  addForm && addForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const body = Object.fromEntries(new FormData(addForm).entries());
+    const res = await fetch('/api/prompts', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    if(res.ok) location.reload(); else alert('Create failed');
+  });
+
+  document.querySelectorAll('.edit-prompt').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.dataset.id;
+      const r = await fetch(`/api/prompts/${id}`);
+      if(!r.ok) return alert('Not found');
+      const p = await r.json();
+      const temp = document.getElementById('editPromptModalTemplate');
+      const clone = temp.cloneNode(true);
+      clone.id = `editPromptModal${id}`;
+      clone.style.display = '';
+      document.body.appendChild(clone);
+      const modal = new bootstrap.Modal(clone);
+      const form = clone.querySelector('.editPromptForm');
+      form.elements['id'].value = p.id;
+      form.elements['name'].value = p.name;
+      form.elements['type'].value = p.type;
+      form.elements['content'].value = p.content;
+      form.addEventListener('submit', async (ev)=>{
+        ev.preventDefault();
+        const body = Object.fromEntries(new FormData(form).entries());
+        const rr = await fetch(`/api/prompts/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+        if(rr.ok) location.reload(); else alert('Update failed');
+      });
+      modal.show();
+    });
+  });
+
+  document.querySelectorAll('.delete-prompt').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if(!confirm('Delete?')) return;
+      const id = btn.dataset.id;
+      const r = await fetch(`/api/prompts/${id}`, { method:'DELETE' });
+      if(r.ok) location.reload(); else alert('Delete failed');
+    });
+  });
+});
+</script>
+{% endblock %}

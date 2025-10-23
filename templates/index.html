@@ -1,0 +1,382 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Subscription Banner -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info border-0 shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1"><i class="fas fa-star me-2"></i>Your Current Plan: <strong>Professional</strong></h5>
+                        <small>Unlimited conversations • Priority support • Advanced analytics</small>
+                    </div>
+                    <div>
+                        <button class="btn btn-light btn-sm me-2" onclick="window.location.href='/pricing'">
+                            <i class="fas fa-arrow-right me-1"></i>View Plans
+                        </button>
+                        <button class="btn btn-outline-light btn-sm" data-bs-dismiss="alert">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-value" id="totalUsers">0</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="stat-icon"><i class="fas fa-comments"></i></div>
+                <div class="stat-value" id="todayConversations">0</div>
+                <div class="stat-label">Conversations Today</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="stat-icon"><i class="fas fa-bolt"></i></div>
+                <div class="stat-value" id="avgResponseTime">0ms</div>
+                <div class="stat-label">Avg Response Time</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-value" id="successRate">0%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Usage Trends</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="usageChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Recent Activities</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline" id="recentActivities">
+                        <div class="timeline-item">
+                            <div class="timeline-time">Loading...</div>
+                            <div class="timeline-content">Please wait</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>System Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="status-indicator status-online"></span>
+                                <span>API Server</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="status-indicator status-online"></span>
+                                <span>Database</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="status-indicator status-warning"></span>
+                                <span>ASR Service</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="status-indicator status-online"></span>
+                                <span>TTS Service</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Functions & Performance -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Top Functions</h5>
+                </div>
+                <div class="card-body">
+                    <div id="topFunctions">
+                        <div class="text-muted">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Performance Metrics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <small class="text-muted">CPU Usage</small>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-success" style="width: 45%">45%</div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <small class="text-muted">Memory Usage</small>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-info" style="width: 62%">62%</div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <small class="text-muted">Disk Usage</small>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-warning" style="width: 78%">78%</div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <small class="text-muted">Network I/O</small>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-danger" style="width: 35%">35%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conversation Distribution & Quick Actions -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Conversation Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="conversationDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{{ url_for('main.users') }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1"><i class="fas fa-user-plus text-primary"></i> Add New User</h6>
+                                    <small>Create a new user account</small>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </a>
+                        <a href="{{ url_for('main.prompts') }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1"><i class="fas fa-plus-circle text-success"></i> Create Prompt</h6>
+                                    <small>Add a new system prompt</small>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </a>
+                        <a href="{{ url_for('main.config') }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1"><i class="fas fa-cog text-info"></i> Configure System</h6>
+                                    <small>Update system settings</small>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </a>
+                        <a href="{{ url_for('main.monitoring') }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1"><i class="fas fa-chart-line text-warning"></i> View Monitoring</h6>
+                                    <small>Check real-time statistics</small>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+async function loadDashboardStats() {
+    try {
+        const res = await fetch('/api/dashboard/stats');
+        if (!res.ok) throw new Error('Failed to load stats');
+        const data = await res.json();
+
+        document.getElementById('totalUsers').textContent = data.total_users;
+        document.getElementById('todayConversations').textContent = data.today_conversations;
+        document.getElementById('avgResponseTime').textContent = '124ms';
+        document.getElementById('successRate').textContent = '98.5%';
+
+        // Load recent activities
+        const activitiesHtml = data.recent_activities.map(log => `
+            <div class="timeline-item">
+                <div class="timeline-time">${new Date(log.timestamp).toLocaleString()}</div>
+                <div class="timeline-content">
+                    <strong>${log.action}</strong> on ${log.resource}
+                </div>
+            </div>
+        `).join('');
+        document.getElementById('recentActivities').innerHTML = activitiesHtml || '<div class="timeline-item"><div class="timeline-content">No recent activities</div></div>';
+    } catch (error) {
+        console.error('Error loading dashboard stats:', error);
+    }
+}
+
+async function loadUsageChart() {
+    try {
+        const res = await fetch('/api/analytics/usage?days=7');
+        if (!res.ok) throw new Error('Failed to load analytics');
+        const data = await res.json();
+
+        const ctx = document.getElementById('usageChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.daily_counts.map(d => d.date),
+                datasets: [{
+                    label: 'Conversations',
+                    data: data.daily_counts.map(d => d.count),
+                    borderColor: '#4a6cf7',
+                    backgroundColor: 'rgba(74, 108, 247, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error loading usage chart:', error);
+    }
+}
+
+async function loadTopFunctions() {
+    try {
+        const res = await fetch('/api/functions');
+        if (!res.ok) throw new Error('Failed to load functions');
+        const functions = await res.json();
+
+        const sorted = functions.sort((a, b) => b.usage_count - a.usage_count).slice(0, 5);
+        const html = sorted.map(f => `
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-3" style="border-bottom: 1px solid #eee;">
+                <div>
+                    <h6 class="mb-1">${f.name}</h6>
+                    <small class="text-muted">${f.description || 'No description'}</small>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary">${f.usage_count} uses</span>
+                </div>
+            </div>
+        `).join('');
+
+        document.getElementById('topFunctions').innerHTML = html || '<div class="text-muted">No functions found</div>';
+    } catch (error) {
+        console.error('Error loading top functions:', error);
+        document.getElementById('topFunctions').innerHTML = '<div class="text-danger">Error loading functions</div>';
+    }
+}
+
+function loadConversationDistributionChart() {
+    const ctx = document.getElementById('conversationDistributionChart');
+    if (!ctx) return;
+
+    new Chart(ctx.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Active', 'Completed', 'Error'],
+            datasets: [{
+                data: [45, 35, 20],
+                backgroundColor: [
+                    '#28a745',
+                    '#4a6cf7',
+                    '#dc3545'
+                ],
+                borderColor: '#fff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadDashboardStats();
+    loadUsageChart();
+    loadTopFunctions();
+    loadConversationDistributionChart();
+});
+</script>
+{% endblock %}

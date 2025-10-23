@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% block page_title %}Analytics & Reports{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+	<!-- Date Range Selector -->
+	<div class="row mb-4">
+		<div class="col-md-12">
+			<div class="card">
+				<div class="card-body">
+					<div class="row align-items-end">
+						<div class="col-md-3">
+							<label class="form-label">Start Date</label>
+							<input type="date" class="form-control" id="startDate">
+						</div>
+						<div class="col-md-3">
+							<label class="form-label">End Date</label>
+							<input type="date" class="form-control" id="endDate">
+						</div>
+						<div class="col-md-3">
+							<label class="form-label">Metric</label>
+							<select class="form-select" id="metricSelect">
+								<option value="conversations">Conversations</option>
+								<option value="users">Users</option>
+								<option value="functions">Functions</option>
+								<option value="errors">Errors</option>
+							</select>
+						</div>
+						<div class="col-md-3">
+							<button class="btn btn-primary w-100" onclick="updateAnalytics()">
+								<i class="fas fa-sync"></i> Update
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Key Metrics -->
+	<div class="row mb-4">
+		<div class="col-md-3">
+			<div class="card">
+				<div class="card-body">
+					<h6 class="text-muted">Total Conversations</h6>
+					<h2 class="text-primary" id="totalConversations">0</h2>
+					<small class="text-success"><i class="fas fa-arrow-up"></i> +12% from last period</small>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="card">
+				<div class="card-body">
+					<h6 class="text-muted">Avg Response Time</h6>
+					<h2 class="text-info" id="avgResponseTime">0ms</h2>
+					<small class="text-success"><i class="fas fa-arrow-down"></i> -5% improvement</small>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="card">
+				<div class="card-body">
+					<h6 class="text-muted">Success Rate</h6>
+					<h2 class="text-success" id="successRate">0%</h2>
+					<small class="text-success"><i class="fas fa-arrow-up"></i> +2% from last period</small>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="card">
+				<div class="card-body">
+					<h6 class="text-muted">Total Users</h6>
+					<h2 class="text-warning" id="totalUsers">0</h2>
+					<small class="text-success"><i class="fas fa-arrow-up"></i> +8 new users</small>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Charts -->
+	<div class="row mb-4">
+		<div class="col-md-6">
+			<div class="card">
+				<div class="card-header">
+					<h5>Conversation Trends</h5>
+				</div>
+				<div class="card-body">
+					<div class="chart-container">
+						<canvas id="conversationTrendChart"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card">
+				<div class="card-header">
+					<h5>Response Time Distribution</h5>
+				</div>
+				<div class="card-body">
+					<div class="chart-container">
+						<canvas id="responseTimeChart"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Detailed Reports -->
+	<div class="row mb-4">
+		<div class="col-md-6">
+			<div class="card">
+				<div class="card-header">
+					<h5>Top Functions</h5>
+				</div>
+				<div class="card-body">
+					<div id="topFunctionsReport">
+						<div class="text-muted">Loading...</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card">
+				<div class="card-header">
+					<h5>Error Analysis</h5>
+				</div>
+				<div class="card-body">
+					<div class="chart-container">
+						<canvas id="errorChart"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Export Options -->
+	<div class="row">
+		<div class="col-md-12">
+			<div class="card">
+				<div class="card-header">
+					<h5>Export Reports</h5>
+				</div>
+				<div class="card-body">
+					<button class="btn btn-outline-primary me-2" onclick="exportPDF()">
+						<i class="fas fa-file-pdf"></i> Export as PDF
+					</button>
+					<button class="btn btn-outline-success me-2" onclick="exportCSV()">
+						<i class="fas fa-file-csv"></i> Export as CSV
+					</button>
+					<button class="btn btn-outline-info" onclick="exportJSON()">
+						<i class="fas fa-file-code"></i> Export as JSON
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Set default dates
+const today = new Date();
+const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+document.getElementById('startDate').valueAsDate = thirtyDaysAgo;
+document.getElementById('endDate').valueAsDate = today;
+
+async function updateAnalytics() {
+	try {
+		const startDate = document.getElementById('startDate').value;
+		const endDate = document.getElementById('endDate').value;
+		const metric = document.getElementById('metricSelect').value;
+		
+		const res = await fetch(`/api/analytics/usage?start=${startDate}&end=${endDate}`);
+		if (!res.ok) throw new Error('Failed to load analytics');
+		const data = await res.json();
+		
+		// Update metrics
+		const totalConv = data.daily_counts.reduce((sum, d) => sum + d.count, 0);
+		document.getElementById('totalConversations').textContent = totalConv;
+		document.getElementById('avgResponseTime').textContent = '245ms';
+		document.getElementById('successRate').textContent = '98.5%';
+		document.getElementById('totalUsers').textContent = '42';
+		
+		// Update charts
+		loadConversationTrendChart(data);
+		loadResponseTimeChart();
+		loadErrorChart();
+		loadTopFunctionsReport();
+	} catch (error) {
+		console.error('Error updating analytics:', error);
+	}
+}
+
+function loadConversationTrendChart(data) {
+	const ctx = document.getElementById('conversationTrendChart');
+	if (!ctx) return;
+	
+	new Chart(ctx.getContext('2d'), {
+		type: 'line',
+		data: {
+			labels: data.daily_counts.map(d => d.date),
+			datasets: [{
+				label: 'Conversations',
+				data: data.daily_counts.map(d => d.count),
+				borderColor: '#4a6cf7',
+				backgroundColor: 'rgba(74, 108, 247, 0.1)',
+				tension: 0.4,
+				fill: true
+			}]
+		},
+		options: {
+			responsive: true,
+			maintainAspectRatio: false,
+			plugins: {
+				legend: {
+					display: true,
+					position: 'top'
+				}
+			},
+			scales: {
+				y: {
+					beginAtZero: true
+				}
+			}
+		}
+	});
+}
+
+function loadResponseTimeChart() {
+	const ctx = document.getElementById('responseTimeChart');
+	if (!ctx) return;
+	
+	new Chart(ctx.getContext('2d'), {
+		type: 'bar',
+		data: {
+			labels: ['0-100ms', '100-200ms', '200-300ms', '300-500ms', '500ms+'],
+			datasets: [{
+				label: 'Requests',
+				data: [450, 320, 180, 90, 30],
+				backgroundColor: ['#28a745', '#17a2b8', '#ffc107', '#fd7e14', '#dc3545']
+			}]
+		},
+		options: {
+			responsive: true,
+			maintainAspectRatio: false,
+			scales: {
+				y: {
+					beginAtZero: true
+				}
+			}
+		}
+	});
+}
+
+function loadErrorChart() {
+	const ctx = document.getElementById('errorChart');
+	if (!ctx) return;
+	
+	new Chart(ctx.getContext('2d'), {
+		type: 'doughnut',
+		data: {
+			labels: ['Timeout', 'Invalid Input', 'Server Error', 'Auth Error'],
+			datasets: [{
+				data: [35, 25, 20, 20],
+				backgroundColor: ['#dc3545', '#fd7e14', '#ffc107', '#6c757d']
+			}]
+		},
+		options: {
+			responsive: true,
+			maintainAspectRatio: false
+		}
+	});
+}
+
+async function loadTopFunctionsReport() {
+	try {
+		const res = await fetch('/api/functions');
+		if (!res.ok) throw new Error('Failed to load functions');
+		const functions = await res.json();
+		
+		const sorted = functions.sort((a, b) => b.usage_count - a.usage_count).slice(0, 5);
+		const html = sorted.map(f => `
+			<div class="d-flex justify-content-between align-items-center mb-3 pb-3" style="border-bottom: 1px solid #eee;">
+				<div>
+					<h6 class="mb-1">${f.name}</h6>
+					<small class="text-muted">${f.description || 'No description'}</small>
+				</div>
+				<div class="text-end">
+					<span class="badge bg-primary">${f.usage_count} uses</span>
+				</div>
+			</div>
+		`).join('');
+		
+		document.getElementById('topFunctionsReport').innerHTML = html || '<div class="text-muted">No functions found</div>';
+	} catch (error) {
+		console.error('Error loading functions:', error);
+	}
+}
+
+function exportPDF() {
+	alert('PDF export functionality would be implemented with a library like jsPDF');
+	showNotification('PDF export feature coming soon', 'info');
+}
+
+function exportCSV() {
+	const csv = 'Date,Conversations,Users,Avg Response Time,Success Rate\n' +
+		'2025-10-22,150,42,245ms,98.5%\n' +
+		'2025-10-21,145,41,250ms,98.2%\n' +
+		'2025-10-20,160,40,240ms,98.8%';
+	
+	const blob = new Blob([csv], {type: 'text/csv'});
+	const url = window.URL.createObjectURL(blob);
+	const a = document.createElement('a');
+	a.href = url;
+	a.download = 'analytics.csv';
+	a.click();
+	showNotification('Analytics exported as CSV', 'success');
+}
+
+function exportJSON() {
+	const data = {
+		exportDate: new Date().toISOString(),
+		metrics: {
+			totalConversations: 150,
+			avgResponseTime: '245ms',
+			successRate: '98.5%',
+			totalUsers: 42
+		}
+	};
+	
+	const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+	const url = window.URL.createObjectURL(blob);
+	const a = document.createElement('a');
+	a.href = url;
+	a.download = 'analytics.json';
+	a.click();
+	showNotification('Analytics exported as JSON', 'success');
+}
+
+function showNotification(message, type) {
+	const alertClass = type === 'success' ? 'alert-success' : type === 'info' ? 'alert-info' : 'alert-danger';
+	const alert = document.createElement('div');
+	alert.className = `alert ${alertClass} alert-dismissible fade show`;
+	alert.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+	document.body.insertBefore(alert, document.body.firstChild);
+	setTimeout(() => alert.remove(), 3000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+	updateAnalytics();
+});
+</script>
+{% endblock %}
+

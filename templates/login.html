@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Login - Voice Assistant{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+    <div class="row w-100">
+        <div class="col-md-5 mx-auto">
+            <div class="card border-0 shadow-lg" style="border-radius: 15px;">
+                <div class="card-body p-5">
+                    <!-- Header -->
+                    <div class="text-center mb-4">
+                        <h1 class="fw-bold" style="color: #667eea;">
+                            <i class="fas fa-robot me-2"></i>Voice Assistant
+                        </h1>
+                        <p class="text-muted">Welcome back</p>
+                    </div>
+
+                    <!-- Alerts -->
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-exclamation-circle me-2"></i>{{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <!-- Login Form -->
+                    <form method="POST" class="needs-validation">
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-bold">Email Address</label>
+                            <input type="email" class="form-control form-control-lg" id="email" name="email"
+                                   placeholder="Enter your email" required>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-4">
+                            <label for="password" class="form-label fw-bold">Password</label>
+                            <input type="password" class="form-control form-control-lg" id="password" name="password"
+                                   placeholder="Enter your password" required>
+                        </div>
+
+                        <!-- Remember Me -->
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                            <label class="form-check-label" for="remember">
+                                Remember me
+                            </label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-lg w-100 fw-bold"
+                                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </button>
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="my-4 text-center">
+                        <span class="text-muted">Don't have an account?</span>
+                    </div>
+
+                    <!-- Register Link -->
+                    <a href="/auth/register" class="btn btn-outline-primary w-100 fw-bold">
+                        <i class="fas fa-user-plus me-2"></i>Create Account
+                    </a>
+
+                    <!-- Forgot Password -->
+                    <div class="text-center mt-3">
+                        <a href="#" class="text-decoration-none text-muted small">
+                            Forgot your password?
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="text-center mt-4 text-white">
+                <small>&copy; 2025 Voice Assistant. All rights reserved.</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control-lg {
+        border-radius: 8px;
+        border: 2px solid #e0e0e0;
+        transition: all 0.3s;
+    }
+
+    .form-control-lg:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    .form-check-input {
+        border-radius: 4px;
+        border: 2px solid #e0e0e0;
+    }
+
+    .form-check-input:checked {
+        background-color: #667eea;
+        border-color: #667eea;
+    }
+
+    .btn-outline-primary {
+        color: #667eea;
+        border-color: #667eea;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #667eea;
+        border-color: #667eea;
+    }
+</style>
+{% endblock %}

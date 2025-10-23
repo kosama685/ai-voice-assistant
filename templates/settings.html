@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+
+{% block page_title %}Settings & Profile{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+	<div class="row">
+		<!-- Sidebar Navigation -->
+		<div class="col-md-3">
+			<div class="list-group">
+				<a href="#profile" class="list-group-item list-group-item-action active" data-bs-toggle="list">
+					<i class="fas fa-user me-2"></i> Profile
+				</a>
+				<a href="#account" class="list-group-item list-group-item-action" data-bs-toggle="list">
+					<i class="fas fa-lock me-2"></i> Account Security
+				</a>
+				<a href="#preferences" class="list-group-item list-group-item-action" data-bs-toggle="list">
+					<i class="fas fa-sliders-h me-2"></i> Preferences
+				</a>
+				<a href="#notifications" class="list-group-item list-group-item-action" data-bs-toggle="list">
+					<i class="fas fa-bell me-2"></i> Notifications
+				</a>
+				<a href="#api" class="list-group-item list-group-item-action" data-bs-toggle="list">
+					<i class="fas fa-key me-2"></i> API Keys
+				</a>
+				<a href="#system" class="list-group-item list-group-item-action" data-bs-toggle="list">
+					<i class="fas fa-cogs me-2"></i> System Settings
+				</a>
+			</div>
+		</div>
+
+		<!-- Content Area -->
+		<div class="col-md-9">
+			<!-- Profile Section -->
+			<div id="profile" class="card mb-4">
+				<div class="card-header">
+					<h5>User Profile</h5>
+				</div>
+				<div class="card-body">
+					<div class="row mb-4">
+						<div class="col-md-3 text-center">
+							<img src="https://picsum.photos/seed/admin/150/150.jpg" alt="Profile" class="rounded-circle mb-3" width="150" height="150">
+							<button class="btn btn-sm btn-outline-primary w-100">Change Avatar</button>
+						</div>
+						<div class="col-md-9">
+							<form id="profileForm">
+								<div class="row mb-3">
+									<div class="col-md-6">
+										<label class="form-label">Full Name</label>
+										<input type="text" class="form-control" value="Admin User" required>
+									</div>
+									<div class="col-md-6">
+										<label class="form-label">Email</label>
+										<input type="email" class="form-control" value="admin@example.com" required>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<div class="col-md-6">
+										<label class="form-label">Phone</label>
+										<input type="tel" class="form-control" placeholder="+1 (555) 000-0000">
+									</div>
+									<div class="col-md-6">
+										<label class="form-label">Department</label>
+										<input type="text" class="form-control" value="Administration">
+									</div>
+								</div>
+								<div class="mb-3">
+									<label class="form-label">Bio</label>
+									<textarea class="form-control" rows="3" placeholder="Tell us about yourself..."></textarea>
+								</div>
+								<button type="submit" class="btn btn-primary">Save Changes</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Account Security Section -->
+			<div id="account" class="card mb-4">
+				<div class="card-header">
+					<h5>Account Security</h5>
+				</div>
+				<div class="card-body">
+					<div class="mb-4">
+						<h6>Change Password</h6>
+						<form id="passwordForm">
+							<div class="mb-3">
+								<label class="form-label">Current Password</label>
+								<input type="password" class="form-control" required>
+							</div>
+							<div class="mb-3">
+								<label class="form-label">New Password</label>
+								<input type="password" class="form-control" required>
+							</div>
+							<div class="mb-3">
+								<label class="form-label">Confirm Password</label>
+								<input type="password" class="form-control" required>
+							</div>
+							<button type="submit" class="btn btn-primary">Update Password</button>
+						</form>
+					</div>
+					<hr>
+					<div class="mb-4">
+						<h6>Two-Factor Authentication</h6>
+						<p class="text-muted">Add an extra layer of security to your account</p>
+						<button class="btn btn-outline-primary">Enable 2FA</button>
+					</div>
+					<hr>
+					<div>
+						<h6>Active Sessions</h6>
+						<div class="table-responsive">
+							<table class="table table-sm">
+								<thead>
+									<tr>
+										<th>Device</th>
+										<th>Location</th>
+										<th>Last Active</th>
+										<th>Action</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>Chrome on Windows</td>
+										<td>New York, USA</td>
+										<td>Just now</td>
+										<td><button class="btn btn-sm btn-outline-danger">Logout</button></td>
+									</tr>
+									<tr>
+										<td>Safari on iPhone</td>
+										<td>New York, USA</td>
+										<td>2 hours ago</td>
+										<td><button class="btn btn-sm btn-outline-danger">Logout</button></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Preferences Section -->
+			<div id="preferences" class="card mb-4">
+				<div class="card-header">
+					<h5>Preferences</h5>
+				</div>
+				<div class="card-body">
+					<div class="mb-3">
+						<label class="form-label">Theme</label>
+						<select class="form-select">
+							<option selected>Light</option>
+							<option>Dark</option>
+							<option>Auto</option>
+						</select>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Language</label>
+						<select class="form-select">
+							<option selected>English</option>
+							<option>Spanish</option>
+							<option>French</option>
+							<option>German</option>
+						</select>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Timezone</label>
+						<select class="form-select">
+							<option selected>Eastern Time (ET)</option>
+							<option>Central Time (CT)</option>
+							<option>Mountain Time (MT)</option>
+							<option>Pacific Time (PT)</option>
+						</select>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Date Format</label>
+						<select class="form-select">
+							<option selected>MM/DD/YYYY</option>
+							<option>DD/MM/YYYY</option>
+							<option>YYYY-MM-DD</option>
+						</select>
+					</div>
+					<button class="btn btn-primary">Save Preferences</button>
+				</div>
+			</div>
+
+			<!-- Notifications Section -->
+			<div id="notifications" class="card mb-4">
+				<div class="card-header">
+					<h5>Notification Settings</h5>
+				</div>
+				<div class="card-body">
+					<div class="form-check form-switch mb-3">
+						<input class="form-check-input" type="checkbox" id="emailNotif" checked>
+						<label class="form-check-label" for="emailNotif">
+							Email Notifications
+						</label>
+					</div>
+					<div class="form-check form-switch mb-3">
+						<input class="form-check-input" type="checkbox" id="pushNotif" checked>
+						<label class="form-check-label" for="pushNotif">
+							Push Notifications
+						</label>
+					</div>
+					<div class="form-check form-switch mb-3">
+						<input class="form-check-input" type="checkbox" id="smsNotif">
+						<label class="form-check-label" for="smsNotif">
+							SMS Notifications
+						</label>
+					</div>
+					<div class="form-check form-switch mb-3">
+						<input class="form-check-input" type="checkbox" id="weeklyReport" checked>
+						<label class="form-check-label" for="weeklyReport">
+							Weekly Report
+						</label>
+					</div>
+					<button class="btn btn-primary">Save Notification Settings</button>
+				</div>
+			</div>
+
+			<!-- API Keys Section -->
+			<div id="api" class="card mb-4">
+				<div class="card-header">
+					<div class="d-flex justify-content-between align-items-center">
+						<h5>API Keys</h5>
+						<button class="btn btn-sm btn-primary" onclick="generateNewKey()">Generate New Key</button>
+					</div>
+				</div>
+				<div class="card-body">
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>Key Name</th>
+									<th>Key</th>
+									<th>Created</th>
+									<th>Last Used</th>
+									<th>Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>Production Key</td>
+									<td><code>sk_live_51234567890abcdef</code></td>
+									<td>2025-01-15</td>
+									<td>Just now</td>
+									<td><button class="btn btn-sm btn-outline-danger">Revoke</button></td>
+								</tr>
+								<tr>
+									<td>Development Key</td>
+									<td><code>sk_test_51234567890abcdef</code></td>
+									<td>2025-01-10</td>
+									<td>2 days ago</td>
+									<td><button class="btn btn-sm btn-outline-danger">Revoke</button></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<!-- System Settings Section -->
+			<div id="system" class="card mb-4">
+				<div class="card-header">
+					<h5>System Settings</h5>
+				</div>
+				<div class="card-body">
+					<div class="alert alert-info">
+						<strong>System Version:</strong> 1.0.0 | <strong>Last Updated:</strong> 2025-10-22
+					</div>
+					<div class="mb-3">
+						<h6>Database</h6>
+						<p class="text-muted">SQLite | Size: 2.5 MB</p>
+						<button class="btn btn-sm btn-outline-secondary">Backup Database</button>
+						<button class="btn btn-sm btn-outline-secondary">Optimize Database</button>
+					</div>
+					<hr>
+					<div class="mb-3">
+						<h6>Cache</h6>
+						<p class="text-muted">Cache Size: 125 MB</p>
+						<button class="btn btn-sm btn-outline-warning">Clear Cache</button>
+					</div>
+					<hr>
+					<div>
+						<h6>Danger Zone</h6>
+						<button class="btn btn-sm btn-outline-danger">Reset All Settings</button>
+						<button class="btn btn-sm btn-outline-danger">Delete Account</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function generateNewKey() {
+	const key = 'sk_' + Math.random().toString(36).substr(2, 20);
+	alert('New API Key: ' + key);
+	showNotification('API key generated successfully', 'success');
+}
+
+function showNotification(message, type) {
+	const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+	const alert = document.createElement('div');
+	alert.className = `alert ${alertClass} alert-dismissible fade show`;
+	alert.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+	document.body.insertBefore(alert, document.body.firstChild);
+	setTimeout(() => alert.remove(), 3000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+	// Profile form
+	const profileForm = document.getElementById('profileForm');
+	profileForm.addEventListener('submit', (e) => {
+		e.preventDefault();
+		showNotification('Profile updated successfully', 'success');
+	});
+	
+	// Password form
+	const passwordForm = document.getElementById('passwordForm');
+	passwordForm.addEventListener('submit', (e) => {
+		e.preventDefault();
+		showNotification('Password changed successfully', 'success');
+		passwordForm.reset();
+	});
+});
+</script>
+{% endblock %}
+

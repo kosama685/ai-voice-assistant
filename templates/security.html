@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Security & Access{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<h3>Security & Access Control</h3>
+	</div>
+
+	<!-- Role Information -->
+	<div class="row mb-4">
+		<div class="col-md-6">
+			<div class="card">
+				<div class="card-header">
+					<h5>User Roles & Permissions</h5>
+				</div>
+				<div class="card-body">
+					<div class="list-group">
+						<div class="list-group-item">
+							<h6 class="mb-2"><i class="fas fa-crown text-warning"></i> Admin</h6>
+							<small class="text-muted">Full access to all features and settings</small>
+							<div class="mt-2">
+								<span class="badge bg-primary">Users</span>
+								<span class="badge bg-primary">Prompts</span>
+								<span class="badge bg-primary">Config</span>
+								<span class="badge bg-primary">Security</span>
+								<span class="badge bg-primary">Analytics</span>
+							</div>
+						</div>
+						<div class="list-group-item">
+							<h6 class="mb-2"><i class="fas fa-code text-info"></i> Developer</h6>
+							<small class="text-muted">Manage prompts, functions, and monitor system</small>
+							<div class="mt-2">
+								<span class="badge bg-info">Prompts</span>
+								<span class="badge bg-info">Functions</span>
+								<span class="badge bg-info">Monitoring</span>
+								<span class="badge bg-info">Analytics</span>
+							</div>
+						</div>
+						<div class="list-group-item">
+							<h6 class="mb-2"><i class="fas fa-user text-success"></i> Tester</h6>
+							<small class="text-muted">Limited access for testing and usage</small>
+							<div class="mt-2">
+								<span class="badge bg-success">Monitoring</span>
+								<span class="badge bg-success">Analytics</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Security Stats -->
+		<div class="col-md-6">
+			<div class="row">
+				<div class="col-12 mb-3">
+					<div class="card text-center">
+						<div class="card-body">
+							<h5 class="card-title">Active Sessions</h5>
+							<h2 class="text-primary" id="activeSessions">0</h2>
+							<small class="text-muted">Users currently logged in</small>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 mb-3">
+					<div class="card text-center">
+						<div class="card-body">
+							<h5 class="card-title">Recent Logins</h5>
+							<h2 class="text-info" id="recentLogins">0</h2>
+							<small class="text-muted">Last 24 hours</small>
+						</div>
+					</div>
+				</div>
+				<div class="col-12">
+					<div class="card text-center">
+						<div class="card-body">
+							<h5 class="card-title">Failed Attempts</h5>
+							<h2 class="text-danger" id="failedAttempts">0</h2>
+							<small class="text-muted">Last 24 hours</small>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Audit Logs -->
+	<div class="row">
+		<div class="col-md-12">
+			<div class="card">
+				<div class="card-header">
+					<h5>Audit Logs</h5>
+				</div>
+				<div class="card-body">
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>Timestamp</th>
+									<th>User ID</th>
+									<th>Action</th>
+									<th>Resource</th>
+									<th>Resource ID</th>
+									<th>IP Address</th>
+									<th>Status</th>
+								</tr>
+							</thead>
+							<tbody id="auditLogsTable">
+								<tr>
+									<td colspan="7" class="text-center text-muted">Loading audit logs...</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadSecurityData(){
+	try {
+		const r = await fetch('/api/audit-logs');
+		if(!r.ok) throw new Error('Failed to load audit logs');
+		const logs = await r.json();
+
+		const tbody = document.getElementById('auditLogsTable');
+		if (logs.length === 0) {
+			tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No audit logs found</td></tr>';
+			return;
+		}
+
+		tbody.innerHTML = logs.map(l => `
+			<tr>
+				<td><small>${new Date(l.timestamp).toLocaleString()}</small></td>
+				<td>${l.user_id}</td>
+				<td><span class="badge bg-info">${l.action}</span></td>
+				<td>${l.resource}</td>
+				<td>${l.resource_id || '-'}</td>
+				<td><small>${l.ip_address || '-'}</small></td>
+				<td>
+					<span class="badge ${l.status === 'success' ? 'bg-success' : 'bg-danger'}">
+						${l.status}
+					</span>
+				</td>
+			</tr>
+		`).join('');
+	} catch (error) {
+		console.error('Error loading security data:', error);
+		document.getElementById('auditLogsTable').innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading audit logs</td></tr>';
+	}
+}
+
+document.addEventListener('DOMContentLoaded', ()=> loadSecurityData());
+</script>
+{% endblock %}
+

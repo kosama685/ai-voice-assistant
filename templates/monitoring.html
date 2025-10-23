@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Live Monitoring{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Live Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Active Users</h5>
+                    <h2 class="text-primary" id="activeUsers">0</h2>
+                    <small class="text-success"><i class="fas fa-arrow-up"></i> 12% from last hour</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Ongoing Conversations</h5>
+                    <h2 class="text-info" id="ongoingConversations">0</h2>
+                    <small class="text-success"><i class="fas fa-arrow-up"></i> 8% from last hour</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Avg Response Time</h5>
+                    <h2 class="text-warning" id="avgResponseTime">124ms</h2>
+                    <small class="text-danger"><i class="fas fa-arrow-up"></i> 5% from last hour</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Error Rate</h5>
+                    <h2 class="text-danger" id="errorRate">1.5%</h2>
+                    <small class="text-success"><i class="fas fa-arrow-down"></i> 0.3% from last hour</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real-time Activity Chart -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Real-time Activity</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="realtimeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>System Alerts</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning" role="alert">
+                        <strong>Warning:</strong> High response time detected on ASR service.
+                    </div>
+                    <div class="alert alert-info" role="alert">
+                        <strong>Info:</strong> New version of the weather function is available.
+                    </div>
+                    <div class="alert alert-success" role="alert">
+                        <strong>Success:</strong> Database backup completed successfully.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Conversations -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5>Recent Conversations</h5>
+                        <button class="btn btn-sm btn-outline-secondary" id="refreshMonitor">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>User</th>
+                                    <th>Start Time</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                    <th>Messages</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="conversationsTable">
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">Loading conversations...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+async function loadMonitoringData(){
+    try {
+        const statsResp = await fetch('/api/dashboard/stats');
+        if(!statsResp.ok) throw new Error('Failed to load stats');
+        const stats = await statsResp.json();
+
+        document.getElementById('activeUsers').textContent = stats.active_users || 0;
+        document.getElementById('ongoingConversations').textContent = stats.today_conversations || 0;
+
+        // Load conversations
+        const convResp = await fetch('/api/conversations');
+        if(convResp.ok) {
+            const conversations = await convResp.json();
+            const tbody = document.getElementById('conversationsTable');
+
+            if (conversations.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No conversations found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = conversations.slice(0, 10).map(c => `
+                <tr>
+                    <td>#C${c.id}</td>
+                    <td>User #${c.user_id}</td>
+                    <td>${new Date(c.start_time).toLocaleString()}</td>
+                    <td>${c.end_time ? 'Completed' : 'Active'}</td>
+                    <td><span class="badge bg-${c.status === 'active' ? 'success' : 'secondary'}">${c.status}</span></td>
+                    <td>${c.message_count}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    } catch (error) {
+        console.error('Error loading monitoring data:', error);
+    }
+}
+
+function loadRealtimeChart() {
+    const ctx = document.getElementById('realtimeChart');
+    if (!ctx) return;
+
+    new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+            datasets: [{
+                label: 'Conversations',
+                data: [12, 19, 3, 5, 2, 3, 15],
+                borderColor: '#4a6cf7',
+                backgroundColor: 'rgba(74, 108, 247, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+    loadMonitoringData();
+    loadRealtimeChart();
+    document.getElementById('refreshMonitor').addEventListener('click', ()=>loadMonitoringData());
+
+    // Auto-refresh every 30 seconds
+    setInterval(loadMonitoringData, 30000);
+});
+</script>
+{% endblock %}

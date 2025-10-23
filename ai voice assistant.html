@@ -1,0 +1,2239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Assistant Management System</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #4a6cf7;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --sidebar-width: 250px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fb;
+            color: #333;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 0;
+            z-index: 1000;
+            overflow-y: auto;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-header h3 {
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-header h3 i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .top-header {
+            background-color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .top-header h2 {
+            color: var(--dark-color);
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid #eee;
+            padding: 15px 20px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* Stats Cards */
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card .stat-icon {
+            font-size: 2rem;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        /* Table Styles */
+        .table {
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+        
+        .table thead th {
+            border: none;
+            padding: 10px;
+            color: var(--secondary-color);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .table tbody tr {
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .table tbody td {
+            padding: 15px 10px;
+            vertical-align: middle;
+            border-top: none;
+        }
+        
+        .table tbody td:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+        
+        .table tbody td:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+        
+        /* Button Styles */
+        .btn {
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: #3a5bd9;
+            border-color: #3a5bd9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            border-color: var(--warning-color);
+            color: var(--dark-color);
+        }
+        
+        /* Form Styles */
+        .form-control, .form-select {
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(74, 108, 247, 0.25);
+        }
+        
+        /* Badge Styles */
+        .badge {
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        /* Status Indicator */
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-online {
+            background-color: var(--success-color);
+        }
+        
+        .status-offline {
+            background-color: var(--secondary-color);
+        }
+        
+        .status-warning {
+            background-color: var(--warning-color);
+        }
+        
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-toggle {
+                display: block !important;
+            }
+        }
+        
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Alert Styles */
+        .alert {
+            border-radius: 8px;
+            border: none;
+            padding: 15px 20px;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+        
+        /* Progress Bar */
+        .progress {
+            height: 10px;
+            border-radius: 5px;
+            background-color: #e9ecef;
+        }
+        
+        .progress-bar {
+            border-radius: 5px;
+        }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background-color: #e9ecef;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -25px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+        }
+        
+        .timeline-content {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .timeline-time {
+            font-size: 0.8rem;
+            color: var(--secondary-color);
+            margin-bottom: 5px;
+        }
+        
+        /* Code Editor */
+        .code-editor {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+        
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-robot"></i> Voice Assistant</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="#" class="menu-item active" data-tab="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="#" class="menu-item" data-tab="users"><i class="fas fa-users"></i> User Management</a></li>
+            <li><a href="#" class="menu-item" data-tab="prompts"><i class="fas fa-comment-dots"></i> Prompt & Logic</a></li>
+            <li><a href="#" class="menu-item" data-tab="monitoring"><i class="fas fa-chart-line"></i> Live Monitoring</a></li>
+            <li><a href="#" class="menu-item" data-tab="analytics"><i class="fas fa-chart-bar"></i> Analytics & Reports</a></li>
+            <li><a href="#" class="menu-item" data-tab="config"><i class="fas fa-cog"></i> System Configuration</a></li>
+            <li><a href="#" class="menu-item" data-tab="security"><i class="fas fa-shield-alt"></i> Security & Access</a></li>
+        </ul>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Header -->
+        <div class="top-header">
+            <div class="d-flex align-items-center">
+                <button class="mobile-toggle me-3" id="mobileToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2 id="pageTitle">Dashboard</h2>
+            </div>
+            <div class="user-info">
+                <span class="me-3">Admin User</span>
+                <img src="https://picsum.photos/seed/admin/40/40.jpg" alt="User">
+            </div>
+        </div>
+        
+        <!-- Dashboard Tab -->
+        <div class="tab-content active" id="dashboard">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-value">1,284</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <div class="stat-icon"><i class="fas fa-comments"></i></div>
+                        <div class="stat-value">8,492</div>
+                        <div class="stat-label">Conversations Today</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <div class="stat-icon"><i class="fas fa-bolt"></i></div>
+                        <div class="stat-value">124ms</div>
+                        <div class="stat-label">Avg Response Time</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-value">98.5%</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Usage Trends</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="usageChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Recent Activities</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-time">2 hours ago</div>
+                                    <div class="timeline-content">
+                                        New user registration: John Doe
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-time">5 hours ago</div>
+                                    <div class="timeline-content">
+                                        System prompt updated for weather assistant
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-time">1 day ago</div>
+                                    <div class="timeline-content">
+                                        API rate limit reached for OpenAI
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-time">2 days ago</div>
+                                    <div class="timeline-content">
+                                        New function added: calendar integration
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>System Status</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <span class="status-indicator status-online"></span>
+                                        <span>API Server</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <span class="status-indicator status-online"></span>
+                                        <span>Database</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <span class="status-indicator status-warning"></span>
+                                        <span>ASR Service</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <span class="status-indicator status-online"></span>
+                                        <span>TTS Service</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Management Tab -->
+        <div class="tab-content" id="users">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search users...">
+                        <button class="btn btn-primary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                        <i class="fas fa-plus"></i> Add New User
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Usage</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#1001</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://picsum.photos/seed/user1/40/40.jpg" alt="User" class="rounded-circle me-2" width="40" height="40">
+                                            John Doe
+                                        </div>
+                                    </td>
+                                    <td>john.doe@example.com</td>
+                                    <td><span class="badge bg-primary">Admin</span></td>
+                                    <td><span class="status-indicator status-online"></span> Active</td>
+                                    <td>
+                                        <div class="progress" style="height: 10px;">
+                                            <div class="progress-bar bg-success" style="width: 65%"></div>
+                                        </div>
+                                        <small>650 / 1000 requests</small>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#1002</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://picsum.photos/seed/user2/40/40.jpg" alt="User" class="rounded-circle me-2" width="40" height="40">
+                                            Jane Smith
+                                        </div>
+                                    </td>
+                                    <td>jane.smith@example.com</td>
+                                    <td><span class="badge bg-info">Developer</span></td>
+                                    <td><span class="status-indicator status-online"></span> Active</td>
+                                    <td>
+                                        <div class="progress" style="height: 10px;">
+                                            <div class="progress-bar bg-warning" style="width: 85%"></div>
+                                        </div>
+                                        <small>850 / 1000 requests</small>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#1003</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://picsum.photos/seed/user3/40/40.jpg" alt="User" class="rounded-circle me-2" width="40" height="40">
+                                            Bob Johnson
+                                        </div>
+                                    </td>
+                                    <td>bob.johnson@example.com</td>
+                                    <td><span class="badge bg-secondary">Tester</span></td>
+                                    <td><span class="status-indicator status-offline"></span> Inactive</td>
+                                    <td>
+                                        <div class="progress" style="height: 10px;">
+                                            <div class="progress-bar bg-info" style="width: 30%"></div>
+                                        </div>
+                                        <small>300 / 1000 requests</small>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#1004</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://picsum.photos/seed/user4/40/40.jpg" alt="User" class="rounded-circle me-2" width="40" height="40">
+                                            Alice Williams
+                                        </div>
+                                    </td>
+                                    <td>alice.williams@example.com</td>
+                                    <td><span class="badge bg-info">Developer</span></td>
+                                    <td><span class="status-indicator status-online"></span> Active</td>
+                                    <td>
+                                        <div class="progress" style="height: 10px;">
+                                            <div class="progress-bar bg-danger" style="width: 95%"></div>
+                                        </div>
+                                        <small>950 / 1000 requests</small>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>User Statistics</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="userStatsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Role Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="roleDistributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Prompt & Assistant Logic Tab -->
+        <div class="tab-content" id="prompts">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <h5>System Prompts</h5>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPromptModal">
+                        <i class="fas fa-plus"></i> Add New Prompt
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Last Updated</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Default Assistant</td>
+                                    <td><span class="badge bg-primary">System</span></td>
+                                    <td>2023-06-15 14:30</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-sm btn-outline-info me-1"><i class="fas fa-copy"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Weather Assistant</td>
+                                    <td><span class="badge bg-info">Function</span></td>
+                                    <td>2023-06-14 09:15</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-sm btn-outline-info me-1"><i class="fas fa-copy"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Customer Support</td>
+                                    <td><span class="badge bg-warning">Custom</span></td>
+                                    <td>2023-06-10 16:45</td>
+                                    <td><span class="badge bg-secondary">Inactive</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-sm btn-outline-info me-1"><i class="fas fa-copy"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Prompt Editor</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="promptName" class="form-label">Prompt Name</label>
+                                <input type="text" class="form-control" id="promptName" value="Default Assistant">
+                            </div>
+                            <div class="mb-3">
+                                <label for="promptType" class="form-label">Type</label>
+                                <select class="form-select" id="promptType">
+                                    <option value="system" selected>System</option>
+                                    <option value="function">Function</option>
+                                    <option value="custom">Custom</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="promptContent" class="form-label">Content</label>
+                                <div class="code-editor" contenteditable="true" id="promptContent">
+You are a helpful assistant. Your role is to assist users with their questions and tasks. 
+Please be polite, professional, and provide accurate information. 
+If you don't know the answer, be honest and suggest alternative approaches.
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="promptActive" checked>
+                                    <label class="form-check-label" for="promptActive">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Function Calls / Tools</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Weather Lookup</h6>
+                                        <small>Get current weather information for a location</small>
+                                    </div>
+                                    <div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Database Query</h6>
+                                        <small>Execute SQL queries on the database</small>
+                                    </div>
+                                    <div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Calendar Integration</h6>
+                                        <small>Access and manage calendar events</small>
+                                    </div>
+                                    <div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Email Sender</h6>
+                                        <small>Send emails to users</small>
+                                    </div>
+                                    <div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Dynamic Behaviors</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="accordion" id="behaviorsAccordion">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="greetingHeading">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#greetingCollapse">
+                                            Greeting Workflow
+                                        </button>
+                                    </h2>
+                                    <div id="greetingCollapse" class="accordion-collapse collapse show" data-bs-parent="#behaviorsAccordion">
+                                        <div class="accordion-body">
+                                            <p>Customize how the assistant greets users based on time of day and user preferences.</p>
+                                            <div class="mb-3">
+                                                <label for="greetingMorning" class="form-label">Morning Greeting</label>
+                                                <input type="text" class="form-control" id="greetingMorning" value="Good morning! How can I help you today?">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="greetingAfternoon" class="form-label">Afternoon Greeting</label>
+                                                <input type="text" class="form-control" id="greetingAfternoon" value="Good afternoon! What can I assist you with?">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="greetingEvening" class="form-label">Evening Greeting</label>
+                                                <input type="text" class="form-control" id="greetingEvening" value="Good evening! How may I help you?">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="fallbackHeading">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#fallbackCollapse">
+                                            Fallback Responses
+                                        </button>
+                                    </h2>
+                                    <div id="fallbackCollapse" class="accordion-collapse collapse" data-bs-parent="#behaviorsAccordion">
+                                        <div class="accordion-body">
+                                            <p>Configure responses when the assistant doesn't understand or can't fulfill a request.</p>
+                                            <div class="mb-3">
+                                                <label for="fallbackMessage" class="form-label">Default Fallback</label>
+                                                <textarea class="form-control" id="fallbackMessage" rows="3">I'm sorry, I don't understand. Could you please rephrase your question or try a different approach?</textarea>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="escalationMessage" class="form-label">Escalation Message</label>
+                                                <textarea class="form-control" id="escalationMessage" rows="3">I'm having trouble with that request. Would you like me to connect you with a human agent?</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Live Monitoring Tab -->
+        <div class="tab-content" id="monitoring">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Active Users</h5>
+                            <h2 class="text-primary">247</h2>
+                            <small class="text-success"><i class="fas fa-arrow-up"></i> 12% from last hour</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Ongoing Conversations</h5>
+                            <h2 class="text-info">182</h2>
+                            <small class="text-success"><i class="fas fa-arrow-up"></i> 8% from last hour</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Avg Response Time</h5>
+                            <h2 class="text-warning">124ms</h2>
+                            <small class="text-danger"><i class="fas fa-arrow-up"></i> 5% from last hour</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Error Rate</h5>
+                            <h2 class="text-danger">1.5%</h2>
+                            <small class="text-success"><i class="fas fa-arrow-down"></i> 0.3% from last hour</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Real-time Activity</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="realtimeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>System Alerts</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning" role="alert">
+                                <strong>Warning:</strong> High response time detected on ASR service.
+                            </div>
+                            <div class="alert alert-info" role="alert">
+                                <strong>Info:</strong> New version of the weather function is available.
+                            </div>
+                            <div class="alert alert-success" role="alert">
+                                <strong>Success:</strong> Database backup completed successfully.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Recent Conversations</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>User</th>
+                                            <th>Start Time</th>
+                                            <th>Duration</th>
+                                            <th>Status</th>
+                                            <th>Messages</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>#C2847</td>
+                                            <td>John Doe</td>
+                                            <td>2023-06-15 14:32:15</td>
+                                            <td>5m 23s</td>
+                                            <td><span class="badge bg-success">Active</span></td>
+                                            <td>12</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#C2846</td>
+                                            <td>Jane Smith</td>
+                                            <td>2023-06-15 14:28:45</td>
+                                            <td>3m 12s</td>
+                                            <td><span class="badge bg-secondary">Completed</span></td>
+                                            <td>8</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#C2845</td>
+                                            <td>Bob Johnson</td>
+                                            <td>2023-06-15 14:25:30</td>
+                                            <td>8m 45s</td>
+                                            <td><span class="badge bg-danger">Error</span></td>
+                                            <td>15</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Analytics & Reports Tab -->
+        <div class="tab-content" id="analytics">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <h5>Usage Analytics</h5>
+                </div>
+                <div class="col-md-6 text-end">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary active">Daily</button>
+                        <button type="button" class="btn btn-outline-primary">Weekly</button>
+                        <button type="button" class="btn btn-outline-primary">Monthly</button>
+                    </div>
+                    <button class="btn btn-primary ms-2">
+                        <i class="fas fa-download"></i> Export Report
+                    </button>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Usage Trends</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="usageTrendsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Most Used Functions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="functionsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Success vs Fallback Rates</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="successChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Session Duration</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="sessionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>User Retention</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="retentionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- System Configuration Tab -->
+        <div class="tab-content" id="config">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>LLM Configuration</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="llmProvider" class="form-label">Provider</label>
+                                <select class="form-select" id="llmProvider">
+                                    <option value="openai" selected>OpenAI</option>
+                                    <option value="claude">Claude</option>
+                                    <option value="gemini">Gemini</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="llmApiKey" class="form-label">API Key</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="llmApiKey" value="sk-xxxxxxxxxxxxxxxxxxxxxxxx">
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleApiKey">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="llmModel" class="form-label">Model</label>
+                                <select class="form-select" id="llmModel">
+                                    <option value="gpt-4" selected>GPT-4</option>
+                                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="llmTemperature" class="form-label">Temperature</label>
+                                <input type="range" class="form-range" id="llmTemperature" min="0" max="1" step="0.1" value="0.7">
+                                <div class="d-flex justify-content-between">
+                                    <small>0 (Deterministic)</small>
+                                    <small id="temperatureValue">0.7</small>
+                                    <small>1 (Creative)</small>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary">Save Configuration</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>ASR/TTS Configuration</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="asrProvider" class="form-label">ASR Provider</label>
+                                <select class="form-select" id="asrProvider">
+                                    <option value="whisper" selected>Whisper</option>
+                                    <option value="google">Google</option>
+                                    <option value="amazon">Amazon</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="asrApiKey" class="form-label">ASR API Key</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="asrApiKey" value="asr-xxxxxxxxxxxxxxxxxxxxxxxx">
+                                    <button class="btn btn-outline-secondary" type="button">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="ttsProvider" class="form-label">TTS Provider</label>
+                                <select class="form-select" id="ttsProvider">
+                                    <option value="elevenlabs" selected>ElevenLabs</option>
+                                    <option value="google">Google</option>
+                                    <option value="amazon">Amazon</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="ttsApiKey" class="form-label">TTS API Key</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="ttsApiKey" value="tts-xxxxxxxxxxxxxxxxxxxxxxxx">
+                                    <button class="btn btn-outline-secondary" type="button">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary">Save Configuration</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Third-party APIs</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="weatherApi" class="form-label">Weather API</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="weatherApi" value="weather-xxxxxxxxxxxxxxxxxxxxxxxx">
+                                    <button class="btn btn-outline-secondary" type="button">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="calendarApi" class="form-label">Calendar API</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="calendarApi" value="calendar-xxxxxxxxxxxxxxxxxxxxxxxx">
+                                    <button class="btn btn-outline-secondary" type="button">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="databaseApi" class="form-label">Database Connection</label>
+                                <input type="text" class="form-control" id="databaseApi" value="postgresql://user:password@localhost:5432/dbname">
+                            </div>
+                            <button class="btn btn-primary">Save Configuration</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Webhooks & Auth</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="webhookUrl" class="form-label">Webhook URL</label>
+                                <input type="text" class="form-control" id="webhookUrl" value="https://example.com/webhook">
+                            </div>
+                            <div class="mb-3">
+                                <label for="webhookSecret" class="form-label">Webhook Secret</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="webhookSecret" value="webhook-xxxxxxxxxxxxxxxxxxxxxxxx">
+                                    <button class="btn btn-outline-secondary" type="button">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="authMethod" class="form-label">Authentication Method</label>
+                                <select class="form-select" id="authMethod">
+                                    <option value="api-key" selected>API Key</option>
+                                    <option value="oauth">OAuth</option>
+                                    <option value="jwt">JWT</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary">Save Configuration</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Versioning & Rollback</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Version</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                            <th>Created</th>
+                                            <th>Created By</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>v2.1.0</td>
+                                            <td><span class="badge bg-success">Current</span></td>
+                                            <td>Updated weather function with new API</td>
+                                            <td>2023-06-15 10:30</td>
+                                            <td>Admin</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i></button>
+                                                <button class="btn btn-sm btn-outline-warning me-1"><i class="fas fa-undo"></i> Rollback</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>v2.0.5</td>
+                                            <td><span class="badge bg-secondary">Previous</span></td>
+                                            <td>Added calendar integration</td>
+                                            <td>2023-06-10 14:15</td>
+                                            <td>Developer</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i></button>
+                                                <button class="btn btn-sm btn-outline-warning me-1"><i class="fas fa-undo"></i> Rollback</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>v2.0.0</td>
+                                            <td><span class="badge bg-secondary">Previous</span></td>
+                                            <td>Major system update</td>
+                                            <td>2023-05-28 09:45</td>
+                                            <td>Admin</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i></button>
+                                                <button class="btn btn-sm btn-outline-warning me-1"><i class="fas fa-undo"></i> Rollback</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Security & Access Control Tab -->
+        <div class="tab-content" id="security">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Role-Based Access Control (RBAC)</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="roleSelect" class="form-label">Select Role</label>
+                                <select class="form-select" id="roleSelect">
+                                    <option value="admin" selected>Admin</option>
+                                    <option value="developer">Developer</option>
+                                    <option value="tester">Tester</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <h6>Permissions</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="permUsers" checked>
+                                    <label class="form-check-label" for="permUsers">
+                                        User Management
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="permPrompts" checked>
+                                    <label class="form-check-label" for="permPrompts">
+                                        Prompt Management
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="permMonitoring" checked>
+                                    <label class="form-check-label" for="permMonitoring">
+                                        System Monitoring
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="permAnalytics" checked>
+                                    <label class="form-check-label" for="permAnalytics">
+                                        Analytics & Reports
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="permConfig" checked>
+                                    <label class="form-check-label" for="permConfig">
+                                        System Configuration
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="permSecurity" checked>
+                                    <label class="form-check-label" for="permSecurity">
+                                        Security Settings
+                                    </label>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary">Save Role Permissions</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Authentication Settings</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <h6>Authentication Methods</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="authEmail" checked>
+                                    <label class="form-check-label" for="authEmail">
+                                        Email & Password
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="authOAuth">
+                                    <label class="form-check-label" for="authOAuth">
+                                        OAuth (Google, GitHub, etc.)
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="authSSO">
+                                    <label class="form-check-label" for="authSSO">
+                                        Single Sign-On (SSO)
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="auth2FA" checked>
+                                    <label class="form-check-label" for="auth2FA">
+                                        Two-Factor Authentication (2FA)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <h6>Session Management</h6>
+                                <div class="mb-2">
+                                    <label for="sessionTimeout" class="form-label">Session Timeout (minutes)</label>
+                                    <input type="number" class="form-control" id="sessionTimeout" value="30">
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="rememberMe" checked>
+                                    <label class="form-check-label" for="rememberMe">
+                                        Allow "Remember Me" option
+                                    </label>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary">Save Authentication Settings</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Audit Logs</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>User</th>
+                                            <th>Action</th>
+                                            <th>Resource</th>
+                                            <th>IP Address</th>
+                                            <th>Timestamp</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>#L10284</td>
+                                            <td>Admin</td>
+                                            <td>Updated</td>
+                                            <td>System Prompt</td>
+                                            <td>192.168.1.1</td>
+                                            <td>2023-06-15 14:32:15</td>
+                                            <td><span class="badge bg-success">Success</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>#L10283</td>
+                                            <td>John Doe</td>
+                                            <td>Created</td>
+                                            <td>User</td>
+                                            <td>192.168.1.2</td>
+                                            <td>2023-06-15 14:28:45</td>
+                                            <td><span class="badge bg-success">Success</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>#L10282</td>
+                                            <td>Jane Smith</td>
+                                            <td>Deleted</td>
+                                            <td>Function</td>
+                                            <td>192.168.1.3</td>
+                                            <td>2023-06-15 14:25:30</td>
+                                            <td><span class="badge bg-danger">Failed</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>#L10281</td>
+                                            <td>Bob Johnson</td>
+                                            <td>Modified</td>
+                                            <td>API Key</td>
+                                            <td>192.168.1.4</td>
+                                            <td>2023-06-15 14:20:15</td>
+                                            <td><span class="badge bg-success">Success</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <iframe src="https://copilotstudio.microsoft.com/environments/Default-6b051f94-3c00-49ff-b77b-042bd590a07e/bots/cr1f5_safeTravels/webchat?__version__=2" frameborder="0" style="width: 100%; height: 100%;"></iframe>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Data Retention</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="conversationRetention" class="form-label">Conversation Data Retention (days)</label>
+                                <input type="number" class="form-control" id="conversationRetention" value="90">
+                            </div>
+                            <div class="mb-3">
+                                <label for="logRetention" class="form-label">System Logs Retention (days)</label>
+                                <input type="number" class="form-control" id="logRetention" value="180">
+                            </div>
+                            <div class="mb-3">
+                                <label for="auditRetention" class="form-label">Audit Logs Retention (days)</label>
+                                <input type="number" class="form-control" id="auditRetention" value="365">
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="autoDelete" checked>
+                                    <label class="form-check-label" for="autoDelete">
+                                        Automatically delete expired data
+                                    </label>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary">Save Retention Settings</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Data Export</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="exportType" class="form-label">Export Type</label>
+                                <select class="form-select" id="exportType">
+                                    <option value="conversations" selected>Conversations</option>
+                                    <option value="users">Users</option>
+                                    <option value="logs">System Logs</option>
+                                    <option value="audit">Audit Logs</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exportFormat" class="form-label">Export Format</label>
+                                <select class="form-select" id="exportFormat">
+                                    <option value="csv" selected>CSV</option>
+                                    <option value="json">JSON</option>
+                                    <option value="pdf">PDF</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exportDateRange" class="form-label">Date Range</label>
+                                <div class="input-group">
+                                    <input type="date" class="form-control" id="exportStartDate" value="2023-06-01">
+                                    <span class="input-group-text">to</span>
+                                    <input type="date" class="form-control" id="exportEndDate" value="2023-06-15">
+                                </div>
+                            </div>
+                            <button class="btn btn-primary">
+                                <i class="fas fa-download"></i> Export Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addUserModalLabel">Add New User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="userName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="userName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="userEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="userEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="userRole" class="form-label">Role</label>
+                            <select class="form-select" id="userRole">
+                                <option value="admin">Admin</option>
+                                <option value="developer">Developer</option>
+                                <option value="tester">Tester</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="userPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="userPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="userStatus" class="form-label">Status</label>
+                            <select class="form-select" id="userStatus">
+                                <option value="active" selected>Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary">Add User</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Prompt Modal -->
+    <div class="modal fade" id="addPromptModal" tabindex="-1" aria-labelledby="addPromptModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPromptModalLabel">Add New Prompt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="newPromptName" class="form-label">Prompt Name</label>
+                            <input type="text" class="form-control" id="newPromptName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPromptType" class="form-label">Type</label>
+                            <select class="form-select" id="newPromptType">
+                                <option value="system">System</option>
+                                <option value="function">Function</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPromptContent" class="form-label">Content</label>
+                            <textarea class="form-control" id="newPromptContent" rows="5" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary">Add Prompt</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Tab switching functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuItems = document.querySelectorAll('.menu-item');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const pageTitle = document.getElementById('pageTitle');
+            
+            menuItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all menu items and tab contents
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to clicked menu item
+                    this.classList.add('active');
+                    
+                    // Show corresponding tab content
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // Update page title
+                    pageTitle.textContent = this.textContent.trim();
+                });
+            });
+            
+            // Mobile sidebar toggle
+            const mobileToggle = document.getElementById('mobileToggle');
+            const sidebar = document.getElementById('sidebar');
+            
+            mobileToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+            
+            // Temperature slider value display
+            const temperatureSlider = document.getElementById('llmTemperature');
+            const temperatureValue = document.getElementById('temperatureValue');
+            
+            if (temperatureSlider) {
+                temperatureSlider.addEventListener('input', function() {
+                    temperatureValue.textContent = this.value;
+                });
+            }
+            
+            // API key visibility toggle
+            const toggleApiKey = document.getElementById('toggleApiKey');
+            if (toggleApiKey) {
+                toggleApiKey.addEventListener('click', function() {
+                    const apiKeyInput = document.getElementById('llmApiKey');
+                    const icon = this.querySelector('i');
+                    
+                    if (apiKeyInput.type === 'password') {
+                        apiKeyInput.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        apiKeyInput.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            }
+            
+            // Initialize Charts
+            initializeCharts();
+        });
+        
+        function initializeCharts() {
+            // Dashboard Usage Chart
+            const usageCtx = document.getElementById('usageChart');
+            if (usageCtx) {
+                new Chart(usageCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Conversations',
+                            data: [1200, 1900, 3000, 2500, 2700, 3200, 2800],
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }, {
+                            label: 'Active Users',
+                            data: [800, 1200, 1800, 1500, 1700, 2000, 1800],
+                            borderColor: 'rgba(118, 75, 162, 1)',
+                            backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // User Statistics Chart
+            const userStatsCtx = document.getElementById('userStatsChart');
+            if (userStatsCtx) {
+                new Chart(userStatsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'New Users',
+                            data: [65, 78, 90, 81, 96, 105],
+                            backgroundColor: 'rgba(102, 126, 234, 0.7)'
+                        }, {
+                            label: 'Active Users',
+                            data: [420, 480, 520, 580, 620, 680],
+                            backgroundColor: 'rgba(118, 75, 162, 0.7)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Role Distribution Chart
+            const roleDistCtx = document.getElementById('roleDistributionChart');
+            if (roleDistCtx) {
+                new Chart(roleDistCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Admin', 'Developer', 'Tester'],
+                        datasets: [{
+                            data: [15, 45, 40],
+                            backgroundColor: [
+                                'rgba(102, 126, 234, 0.7)',
+                                'rgba(118, 75, 162, 0.7)',
+                                'rgba(240, 147, 251, 0.7)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Real-time Chart
+            const realtimeCtx = document.getElementById('realtimeChart');
+            if (realtimeCtx) {
+                new Chart(realtimeCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['14:00', '14:05', '14:10', '14:15', '14:20', '14:25', '14:30'],
+                        datasets: [{
+                            label: 'API Response Time (ms)',
+                            data: [120, 125, 118, 130, 135, 128, 124],
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }, {
+                            label: 'Error Rate (%)',
+                            data: [1.2, 1.5, 1.0, 1.8, 2.0, 1.3, 1.5],
+                            borderColor: 'rgba(245, 87, 108, 1)',
+                            backgroundColor: 'rgba(245, 87, 108, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'Response Time (ms)'
+                                }
+                            },
+                            y1: {
+                                beginAtZero: true,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: 'Error Rate (%)'
+                                },
+                                grid: {
+                                    drawOnChartArea: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Usage Trends Chart
+            const usageTrendsCtx = document.getElementById('usageTrendsChart');
+            if (usageTrendsCtx) {
+                new Chart(usageTrendsCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+                        datasets: [{
+                            label: 'Total Requests',
+                            data: [3200, 3500, 3100, 3800, 4200, 3900, 4100],
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Functions Chart
+            const functionsCtx = document.getElementById('functionsChart');
+            if (functionsCtx) {
+                new Chart(functionsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Weather', 'Database', 'Calendar', 'Email', 'Search'],
+                        datasets: [{
+                            label: 'Usage Count',
+                            data: [450, 380, 320, 280, 220],
+                            backgroundColor: [
+                                'rgba(102, 126, 234, 0.7)',
+                                'rgba(118, 75, 162, 0.7)',
+                                'rgba(240, 147, 251, 0.7)',
+                                'rgba(245, 87, 108, 0.7)',
+                                'rgba(67, 233, 123, 0.7)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Success vs Fallback Chart
+            const successCtx = document.getElementById('successChart');
+            if (successCtx) {
+                new Chart(successCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Success', 'Fallback'],
+                        datasets: [{
+                            data: [85, 15],
+                            backgroundColor: [
+                                'rgba(67, 233, 123, 0.7)',
+                                'rgba(245, 87, 108, 0.7)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Session Duration Chart
+            const sessionCtx = document.getElementById('sessionChart');
+            if (sessionCtx) {
+                new Chart(sessionCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['0-1 min', '1-3 min', '3-5 min', '5-10 min', '10+ min'],
+                        datasets: [{
+                            label: 'Number of Sessions',
+                            data: [120, 380, 520, 280, 140],
+                            backgroundColor: 'rgba(102, 126, 234, 0.7)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Retention Chart
+            const retentionCtx = document.getElementById('retentionChart');
+            if (retentionCtx) {
+                new Chart(retentionCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Day 1', 'Day 7', 'Day 14', 'Day 30', 'Day 60', 'Day 90'],
+                        datasets: [{
+                            label: 'User Retention (%)',
+                            data: [100, 75, 60, 45, 35, 30],
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
