@@ -525,17 +525,24 @@ class VoiceAssistantWidget {
         this.state.turnCount++;
 
         try {
-            const response = await fetch(`${this.config.apiUrl}/api/widget/chat`, {
+            const response = await fetch(`${this.config.apiUrl}/widget/api/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     message,
                     sessionId: this.state.sessionId,
-                    turnCount: this.state.turnCount
+                    synthesize: true
                 })
             });
 
             const data = await response.json();
+
+            if (!data.success) {
+                console.error('API Error:', data.error);
+                this.addMessage('assistant', `Error: ${data.error || 'Failed to get response'}`);
+                return;
+            }
+
             this.addMessage('assistant', data.response);
             this.trackAnalytics('message_sent');
         } catch (error) {

@@ -18,7 +18,7 @@ class Config:
     # ============ AI & LLM CONFIGURATION ============
     # Google Gemini API
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyBHAl_-FQIXwNK43WUs0c6vxQMKf0OKw14')
-    GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-1.5-flash')
+    GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-2.0-flash')
 
     # ============ SPEECH-TO-TEXT (ASR) CONFIGURATION ============
     # Google Speech-to-Text API

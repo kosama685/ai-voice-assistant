@@ -40,15 +40,13 @@ class LLMService:
             Dict with response, metadata, and status
         """
         try:
-            if not self.api_key or self.api_key == 'AIzaSyBHAl_-FQIXwNK43WUs0c6vxQMKf0OKw14':
-                # Verify API key is valid
-                if not self._verify_api_key():
-                    return {
-                        'success': False,
-                        'error': 'Invalid or missing Gemini API key. Please configure GEMINI_API_KEY in .env',
-                        'provider': 'gemini',
-                        'status_code': 401
-                    }
+            if not self.api_key:
+                return {
+                    'success': False,
+                    'error': 'Missing Gemini API key. Please configure GEMINI_API_KEY in .env',
+                    'provider': 'gemini',
+                    'status_code': 401
+                }
 
             temp = temperature if temperature is not None else self.temperature
 
