@@ -23,6 +23,11 @@ def voice_chat():
     """Voice chat interface"""
     return render_template('voice_chat.html')
 
+@main_bp.route('/voice-assistant-test')
+def voice_assistant_test():
+    """Voice assistant test and demo page (public)"""
+    return render_template('voice_assistant_test.html')
+
 @main_bp.route('/analytics')
 @login_required
 def analytics():

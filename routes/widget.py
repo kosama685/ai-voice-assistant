@@ -8,6 +8,8 @@ from flask_login import login_required, current_user
 from datetime import datetime
 import json
 import uuid
+import base64
+from services.voice_orchestrator import voice_orchestrator
 
 widget_bp = Blueprint('widget', __name__, url_prefix='/widget')
 
@@ -53,29 +55,49 @@ class WidgetSession:
 
 @widget_bp.route('/api/chat', methods=['POST'])
 def widget_chat():
-    """Handle widget chat messages"""
+    """Handle widget chat messages with LLM"""
     try:
         data = request.get_json()
         message = data.get('message', '').strip()
         session_id = data.get('sessionId', str(uuid.uuid4()))
-        
+        synthesize = data.get('synthesize', False)
+        voice = data.get('voice', None)
+
         if not message:
             return jsonify({'error': 'Message is required'}), 400
 
         # Get or create session
         if session_id not in widget_sessions:
             widget_sessions[session_id] = WidgetSession(session_id)
-        
+
         session = widget_sessions[session_id]
         session.add_message('user', message)
 
-        # Generate response (simple echo for now, can integrate with AI)
-        response_text = generate_widget_response(message)
+        # Process text through orchestrator (LLM -> TTS)
+        result = voice_orchestrator.process_text_input(
+            text=message,
+            session_id=session_id,
+            synthesize_response=synthesize,
+            voice=voice
+        )
+
+        if not result['success']:
+            return jsonify({
+                'success': False,
+                'error': result.get('error', 'Chat processing failed')
+            }), 400
+
+        response_text = result['response_text']
         session.add_message('assistant', response_text)
 
         return jsonify({
             'success': True,
             'response': response_text,
+            'audio': result.get('audio_response'),
+            'providers': {
+                'llm': result.get('llm_provider'),
+                'tts': result.get('tts_provider')
+            },
             'sessionId': session_id,
             'turnCount': session.turn_count
         }), 200
@@ -87,32 +109,62 @@ def widget_chat():
 
 @widget_bp.route('/api/voice', methods=['POST'])
 def widget_voice():
-    """Handle widget voice input"""
+    """Handle widget voice input with full ASR -> LLM -> TTS pipeline"""
     try:
+        # Get audio data (base64 encoded)
         data = request.get_json()
-        audio_data = data.get('audio')
+        audio_base64 = data.get('audio')
         session_id = data.get('sessionId', str(uuid.uuid4()))
+        language = data.get('language', 'en-US')
+        voice = data.get('voice', None)
+        synthesize = data.get('synthesize', True)
 
-        if not audio_data:
+        if not audio_base64:
             return jsonify({'error': 'Audio data is required'}), 400
 
         # Get or create session
         if session_id not in widget_sessions:
             widget_sessions[session_id] = WidgetSession(session_id)
 
-        # Process audio (transcribe, generate response, synthesize)
-        transcribed_text = "Voice input received"  # Placeholder
-        response_text = generate_widget_response(transcribed_text)
-        
-        # Generate TTS audio
-        audio_url = f"/static/audio/response_{session_id}.mp3"
+        # Decode audio from base64
+        try:
+            audio_data = base64.b64decode(audio_base64)
+        except Exception as e:
+            return jsonify({'error': f'Invalid audio data: {str(e)}'}), 400
+
+        # Process voice through orchestrator (ASR -> LLM -> TTS)
+        result = voice_orchestrator.process_voice_input(
+            audio_data=audio_data,
+            session_id=session_id,
+            audio_format='wav',
+            language=language,
+            synthesize_response=synthesize,
+            voice=voice
+        )
+
+        if not result['success']:
+            return jsonify({
+                'success': False,
+                'error': result.get('error', 'Voice processing failed'),
+                'stage': result.get('stage', 'unknown')
+            }), 400
+
+        # Add to session
+        widget_sessions[session_id].add_message('user', result['transcribed_text'])
+        widget_sessions[session_id].add_message('assistant', result['response_text'])
 
         return jsonify({
             'success': True,
-            'transcribed': transcribed_text,
-            'response': response_text,
-            'audioUrl': audio_url,
-            'sessionId': session_id
+            'transcribed': result['transcribed_text'],
+            'response': result['response_text'],
+            'audio': result.get('audio_response'),
+            'providers': {
+                'asr': result.get('asr_provider'),
+                'llm': result.get('llm_provider'),
+                'tts': result.get('tts_provider')
+            },
+            'sessionId': session_id,
+            'turnCount': widget_sessions[session_id].turn_count
         }), 200
 
     except Exception as e:
@@ -265,7 +317,7 @@ def generate_widget_response(user_message):
 
 
 # ============================================================================
-# HEALTH CHECK
+# HEALTH CHECK & SYSTEM STATUS
 # ============================================================================
 
 @widget_bp.route('/health', methods=['GET'])
@@ -276,4 +328,53 @@ def widget_health():
         'timestamp': datetime.utcnow().isoformat(),
         'activeSessions': len(widget_sessions)
     }), 200
+
+
+@widget_bp.route('/api/health', methods=['GET'])
+def api_health():
+    """Complete system health check"""
+    try:
+        health = voice_orchestrator.get_system_health()
+        return jsonify(health), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'error': str(e),
+            'timestamp': datetime.utcnow().isoformat()
+        }), 500
+
+
+@widget_bp.route('/api/config', methods=['GET'])
+def get_config():
+    """Get current configuration"""
+    try:
+        config = {
+            'asr': {
+                'provider': voice_orchestrator.asr_service.provider,
+                'model': voice_orchestrator.asr_service.whisper_model
+            },
+            'llm': {
+                'provider': 'gemini',
+                'model': voice_orchestrator.llm_service.model,
+                'temperature': voice_orchestrator.llm_service.temperature
+            },
+            'tts': {
+                'provider': voice_orchestrator.tts_service.provider,
+                'default_voice': voice_orchestrator.tts_service.default_voice,
+                'default_speed': voice_orchestrator.tts_service.default_speed
+            }
+        }
+        return jsonify(config), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@widget_bp.route('/api/stats/<session_id>', methods=['GET'])
+def get_session_stats(session_id):
+    """Get conversation statistics"""
+    try:
+        stats = voice_orchestrator.get_conversation_stats(session_id)
+        return jsonify(stats), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
