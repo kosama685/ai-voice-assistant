@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}System Monitoring - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-chart-line"></i> System Monitoring
+            </h1>
+        </div>
+        <div class="col-md-4 text-right">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary active" onclick="setRefreshRate(5)">5s</button>
+                <button type="button" class="btn btn-outline-primary" onclick="setRefreshRate(10)">10s</button>
+                <button type="button" class="btn btn-outline-primary" onclick="setRefreshRate(30)">30s</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real-time Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">Active Conversations</div>
+                    <div class="h3 mb-0" id="activeConversations">-</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">Messages/Min</div>
+                    <div class="h3 mb-0" id="messagesPerMin">-</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">Avg Response Time</div>
+                    <div class="h3 mb-0" id="avgResponseTime">-</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">Error Rate</div>
+                    <div class="h3 mb-0" id="errorRate">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Real-time Activity</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Response Time Trend</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="responseTimeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Messages -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Messages</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Time</th>
+                                <th>Message</th>
+                                <th>Status</th>
+                                <th>Response Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentMessagesTable">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-3">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+    let refreshRate = 5000;
+    let activityChart = null;
+    let responseTimeChart = null;
+    let activityData = [];
+    let responseTimeData = [];
+
+    function setRefreshRate(seconds) {
+        refreshRate = seconds * 1000;
+        clearInterval(window.monitoringInterval);
+        startMonitoring();
+    }
+
+    async function loadMonitoringData() {
+        try {
+            const response = await fetch('/admin/api/monitoring/realtime');
+            const data = await response.json();
+            
+            if (data.success) {
+                const metrics = data.metrics;
+                document.getElementById('activeConversations').textContent = metrics.active_conversations;
+                
+                // Update charts
+                updateActivityChart(metrics.recent_messages.length);
+                
+                // Update recent messages
+                renderRecentMessages(metrics.recent_messages);
+            }
+        } catch (error) {
+            console.error('Error loading monitoring data:', error);
+        }
+    }
+
+    function updateActivityChart(messageCount) {
+        const now = new Date().toLocaleTimeString();
+        activityData.push({time: now, count: messageCount});
+        
+        if (activityData.length > 20) {
+            activityData.shift();
+        }
+        
+        const ctx = document.getElementById('activityChart');
+        if (!ctx) return;
+        
+        if (activityChart) {
+            activityChart.destroy();
+        }
+        
+        activityChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: activityData.map(d => d.time),
+                datasets: [{
+                    label: 'Messages',
+                    data: activityData.map(d => d.count),
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {display: false}
+                },
+                scales: {
+                    y: {beginAtZero: true}
+                }
+            }
+        });
+    }
+
+    function renderRecentMessages(messages) {
+        const tbody = document.getElementById('recentMessagesTable');
+        
+        if (messages.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">No recent messages</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = messages.map(msg => `
+            <tr>
+                <td><small>${new Date(msg.created_at).toLocaleTimeString()}</small></td>
+                <td><small>${msg.text}</small></td>
+                <td>
+                    <span class="badge badge-${msg.status === 'success' ? 'success' : 'danger'}">
+                        ${msg.status}
+                    </span>
+                </td>
+                <td><small>-</small></td>
+            </tr>
+        `).join('');
+    }
+
+    function startMonitoring() {
+        loadMonitoringData();
+        window.monitoringInterval = setInterval(loadMonitoringData, refreshRate);
+    }
+
+    // Load on page load
+    document.addEventListener('DOMContentLoaded', startMonitoring);
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        if (window.monitoringInterval) {
+            clearInterval(window.monitoringInterval);
+        }
+    });
+</script>
+{% endblock %}
+

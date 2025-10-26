@@ -23,12 +23,14 @@ def create_app(config_class=Config):
     from routes.api import api_bp
     from routes.widget import widget_bp
     from routes.voice_api import voice_api_bp
+    from routes.admin_panel import admin_bp
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(widget_bp, url_prefix='/widget')
     app.register_blueprint(voice_api_bp)
+    app.register_blueprint(admin_bp, url_prefix='/admin')
 
     # Initialize database with default data
     with app.app_context():

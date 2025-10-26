@@ -21,33 +21,46 @@ class LLMService:
         self.conversation_history = {}  # Store conversation context
         
     def generate_response(
-        self, 
-        prompt: str, 
+        self,
+        prompt: str,
         session_id: str = None,
         context: str = None,
         temperature: Optional[float] = None
     ) -> Dict[str, Any]:
         """
         Generate response using Google Gemini
-        
+
         Args:
             prompt: User message
             session_id: Conversation session ID
             context: Previous conversation context
             temperature: Response creativity (0.0-1.0)
-            
+
         Returns:
             Dict with response, metadata, and status
         """
         try:
+            if not self.api_key or self.api_key == 'AIzaSyBHAl_-FQIXwNK43WUs0c6vxQMKf0OKw14':
+                # Verify API key is valid
+                if not self._verify_api_key():
+                    return {
+                        'success': False,
+                        'error': 'Invalid or missing Gemini API key. Please configure GEMINI_API_KEY in .env',
+                        'provider': 'gemini',
+                        'status_code': 401
+                    }
+
             temp = temperature if temperature is not None else self.temperature
-            
+
             # Build conversation context
             full_prompt = self._build_prompt(prompt, session_id, context)
-            
+
             url = f"{self.base_url}/{self.model}:generateContent"
-            headers = {"Content-Type": "application/json"}
-            
+            headers = {
+                "Content-Type": "application/json",
+                "User-Agent": "VoiceAssistant/2.3"
+            }
+
             payload = {
                 "contents": [{
                     "parts": [{"text": full_prompt}]
@@ -59,22 +72,33 @@ class LLMService:
                     "maxOutputTokens": self.max_tokens,
                 }
             }
-            
+
+            # Make request with proper error handling
             response = requests.post(
                 f"{url}?key={self.api_key}",
                 json=payload,
                 headers=headers,
                 timeout=30
             )
-            
+
             if response.status_code == 200:
                 data = response.json()
+
+                # Check if response has candidates
+                if 'candidates' not in data or not data['candidates']:
+                    return {
+                        'success': False,
+                        'error': 'No response generated from Gemini API',
+                        'provider': 'gemini',
+                        'raw_response': data
+                    }
+
                 text = data['candidates'][0]['content']['parts'][0]['text']
-                
+
                 # Store in conversation history
                 if session_id:
                     self._store_conversation(session_id, prompt, text)
-                
+
                 return {
                     'success': True,
                     'response': text,
@@ -84,27 +108,66 @@ class LLMService:
                     'timestamp': datetime.utcnow().isoformat()
                 }
             else:
-                error_msg = response.json().get('error', {}).get('message', 'Unknown error')
+                try:
+                    error_data = response.json()
+                    error_msg = error_data.get('error', {}).get('message', 'Unknown error')
+                except:
+                    error_msg = response.text or 'Unknown error'
+
                 return {
                     'success': False,
                     'error': f"Gemini API error: {error_msg}",
                     'provider': 'gemini',
-                    'status_code': response.status_code
+                    'status_code': response.status_code,
+                    'response_text': response.text[:500]  # First 500 chars for debugging
                 }
-                
+
         except requests.exceptions.Timeout:
             return {
                 'success': False,
                 'error': 'Request timeout - Gemini API took too long',
                 'provider': 'gemini'
             }
+        except requests.exceptions.ConnectionError as e:
+            return {
+                'success': False,
+                'error': f'Connection error: {str(e)}',
+                'provider': 'gemini'
+            }
         except Exception as e:
             return {
                 'success': False,
-                'error': str(e),
+                'error': f'Unexpected error: {str(e)}',
                 'provider': 'gemini'
             }
     
+    def _verify_api_key(self) -> bool:
+        """Verify API key is valid by making a test request"""
+        try:
+            url = f"{self.base_url}/{self.model}:generateContent"
+            headers = {"Content-Type": "application/json"}
+
+            payload = {
+                "contents": [{
+                    "parts": [{"text": "test"}]
+                }],
+                "generationConfig": {
+                    "temperature": 0.1,
+                    "maxOutputTokens": 10,
+                }
+            }
+
+            response = requests.post(
+                f"{url}?key={self.api_key}",
+                json=payload,
+                headers=headers,
+                timeout=10
+            )
+
+            return response.status_code == 200
+        except:
+            return False
+
     def _build_prompt(self, prompt: str, session_id: str = None, context: str = None) -> str:
         """Build prompt with context"""
         system_prompt = """You are a helpful, friendly voice assistant. 

@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Voice Assistant{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+            </h1>
+        </div>
+        <div class="col-md-4 text-right">
+            <div class="btn-group" role="group">
+                <a href="{{ url_for('admin.users_page') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-users"></i> Users
+                </a>
+                <a href="{{ url_for('admin.prompts_page') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-comments"></i> Prompts
+                </a>
+                <a href="{{ url_for('admin.monitoring_page') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-chart-line"></i> Monitoring
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-left-primary">
+                <div class="card-body">
+                    <div class="text-primary font-weight-bold text-uppercase mb-1">Total Users</div>
+                    <div class="h3 mb-0" id="total-users">-</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-left-success">
+                <div class="card-body">
+                    <div class="text-success font-weight-bold text-uppercase mb-1">Active Users</div>
+                    <div class="h3 mb-0" id="active-users">-</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-left-info">
+                <div class="card-body">
+                    <div class="text-info font-weight-bold text-uppercase mb-1">Today's Conversations</div>
+                    <div class="h3 mb-0" id="today-conversations">-</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-left-warning">
+                <div class="card-body">
+                    <div class="text-warning font-weight-bold text-uppercase mb-1">Success Rate</div>
+                    <div class="h3 mb-0" id="success-rate">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Usage Trends (Last 30 Days)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="usageChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">System Health</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>API Response Time</span>
+                            <span id="api-response-time">-</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" id="api-response-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Database Health</span>
+                            <span id="db-health">-</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" id="db-health-bar" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>System Uptime</span>
+                            <span id="system-uptime">-</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" id="uptime-bar" style="width: 99.9%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activity-table">
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-left-primary {
+        border-left: 4px solid #007bff;
+    }
+    .border-left-success {
+        border-left: 4px solid #28a745;
+    }
+    .border-left-info {
+        border-left: 4px solid #17a2b8;
+    }
+    .border-left-warning {
+        border-left: 4px solid #ffc107;
+    }
+    .card {
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        border: none;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+    let usageChart = null;
+
+    async function loadDashboardStats() {
+        try {
+            const response = await fetch('/admin/api/dashboard/stats');
+            const data = await response.json();
+            
+            if (data.success) {
+                const stats = data.stats;
+                document.getElementById('total-users').textContent = stats.total_users;
+                document.getElementById('active-users').textContent = stats.active_users;
+                document.getElementById('today-conversations').textContent = stats.today_conversations;
+                document.getElementById('success-rate').textContent = stats.success_rate + '%';
+                document.getElementById('api-response-time').textContent = stats.avg_response_time + 'ms';
+            }
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+    }
+
+    async function loadUsageAnalytics() {
+        try {
+            const response = await fetch('/admin/api/analytics/usage');
+            const data = await response.json();
+            
+            if (data.success && data.usage.length > 0) {
+                const dates = data.usage.map(u => u.date);
+                const counts = data.usage.map(u => u.count);
+                
+                const ctx = document.getElementById('usageChart').getContext('2d');
+                
+                if (usageChart) {
+                    usageChart.destroy();
+                }
+                
+                usageChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: 'Messages',
+                            data: counts,
+                            borderColor: '#007bff',
+                            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Error loading analytics:', error);
+        }
+    }
+
+    // Load data on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadDashboardStats();
+        loadUsageAnalytics();
+        
+        // Refresh every 30 seconds
+        setInterval(loadDashboardStats, 30000);
+        setInterval(loadUsageAnalytics, 60000);
+    });
+</script>
+{% endblock %}
+
