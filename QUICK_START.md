@@ -1,17 +1,38 @@
-# Quick Start Guide - Voice Assistant Management System
+# Quick Start Guide - Voice Assistant Management System v2.3
 
-## Starting the Application
+## Installation & Setup (5 minutes)
 
-### Option 1: Using Virtual Environment (Recommended)
+### 1. Clone Repository
 ```bash
-cd c:\laragon\www\voice_assistant_app
-.\venv\Scripts\activate
-python run.py
+git clone https://github.com/kosama685/ai-voice-assistant.git
+cd ai-voice-assistant
 ```
 
-### Option 2: Direct Python
+### 2. Create Virtual Environment
 ```bash
-cd c:\laragon\www\voice_assistant_app
+python -m venv venv
+.\venv\Scripts\activate  # Windows
+```
+
+### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure Environment
+```bash
+cp .env.example .env
+# Edit .env with your API keys
+```
+
+### 5. Initialize Database
+```bash
+flask db upgrade
+python -c "from models import initialize_database; initialize_database()"
+```
+
+### 6. Run Application
+```bash
 python run.py
 ```
 
@@ -19,35 +40,42 @@ The application will start at: **http://127.0.0.1:5000**
 
 ## Default Login Credentials
 
-**Email**: admin@example.com  
+**Email**: admin@example.com
 **Password**: admin123
 
-## Navigation Menu
+## Admin Panel Features
 
-### 1. **Dashboard** 📊
-- View system statistics
-- See usage trends over 7 days
-- Check recent activities
-- Monitor system status
+### 1. **Dashboard** 📊 (`/admin/dashboard`)
+- Real-time statistics (total users, active users, conversations)
+- 30-day usage trends with Chart.js visualization
+- System health indicators
+- Recent activity feed
+- Auto-refresh every 30 seconds
 
-### 2. **User Management** 👥
-- View all users
-- Add new users
-- Edit user details
-- Delete users
-- Track user usage
+### 2. **User Management** 👥 (`/admin/users`)
+- View all users with pagination
+- Filter by role (admin, developer, tester, user)
+- Filter by status (active, inactive)
+- Edit user role and status
+- Delete users with confirmation
+- Track per-user usage statistics
 
-### 3. **Prompt & Logic** 💬
-- Manage system prompts
-- Create custom prompts
-- Edit prompt content
+### 3. **Prompt Management** 💬 (`/admin/prompts`)
+- Create new system prompts
+- Edit existing prompts
+- Set personality (Friendly, Professional, Casual, Formal)
+- Set tone (Conversational, Informative, Supportive, Neutral)
 - Enable/disable prompts
-- View function calls
+- View prompt preview
 
-### 4. **Live Monitoring** 📈
-- Real-time statistics
-- Active users count
-- Ongoing conversations
+### 4. **Real-time Monitoring** 📈 (`/admin/monitoring`)
+- Active conversations counter
+- Messages per minute tracking
+- Average response time
+- Error rate monitoring
+- Real-time activity chart
+- Recent messages log
+- Configurable refresh rate (5s, 10s, 30s)
 - Response time metrics
 - Error rate tracking
 - Recent conversations list
