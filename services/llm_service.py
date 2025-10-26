@@ -14,7 +14,7 @@ class LLMService:
     
     def __init__(self):
         self.api_key = os.environ.get('GEMINI_API_KEY', 'AIzaSyBHAl_-FQIXwNK43WUs0c6vxQMKf0OKw14')
-        self.model = os.environ.get('GEMINI_MODEL', 'gemini-1.5-flash')
+        self.model = os.environ.get('GEMINI_MODEL', 'gemini-2.0-flash')
         self.base_url = "https://generativelanguage.googleapis.com/v1beta/models"
         self.temperature = float(os.environ.get('LLM_TEMPERATURE', '0.7'))
         self.max_tokens = int(os.environ.get('LLM_MAX_TOKENS', '1024'))
